@@ -2,14 +2,21 @@
   "name": "StreamManagerApp",
   "version": "0.0.1",
   "private": true,
-    "scripts": {
+  "scripts": {
     "start": "react-native start",
     "android": "npx react-native run-android",
     "start-and-android": " npx react-native run-android && yarn start && yarn android"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.1.1",
+    "@react-navigation/native": "^7.0.14",
+    "@react-navigation/stack": "^7.1.1",
+    "axios": "^1.7.9",
     "react": "18.3.1",
-    "react-native": "0.77.0"
+    "react-native": "0.77.0",
+    "react-native-safe-area-context": "^5.2.0",
+    "react-native-screens": "^4.6.0",
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
