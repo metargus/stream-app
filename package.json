@@ -2,12 +2,10 @@
   "name": "StreamManagerApp",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "lint": "eslint .",
+    "scripts": {
     "start": "react-native start",
-    "test": "jest"
+    "android": "npx react-native run-android",
+    "start-and-android": " npx react-native run-android && yarn start && yarn android"
   },
   "dependencies": {
     "react": "18.3.1",
