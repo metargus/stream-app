@@ -5,7 +5,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    Image,
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
@@ -79,10 +78,10 @@ export const SignInScreen: React.FC = () => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            <Image
-                source={require('../../assets/logo-with-name.png')}
-                style={styles.logo}
-            />
+            {/*<Image*/}
+            {/*    source={require('..')}*/}
+            {/*    style={styles.logo}*/}
+            {/*/>*/}
 
             <FloatingLabelInput
                 label="Username"

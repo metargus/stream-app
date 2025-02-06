@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService from '../services/auth';
-import { User } from '../types/auth';
+import { User } from '../types/user.ts';
 
 interface AuthContextType {
     isAuthenticated: boolean;

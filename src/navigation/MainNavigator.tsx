@@ -2,6 +2,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MainStackParamList } from './types';
+import { OrganizationsScreen } from '../screens/organizations/OrganizationsScreen.tsx';
 
 const Stack = createStackNavigator<MainStackParamList>();
 
@@ -9,8 +10,8 @@ export const MainNavigator = () => {
     return (
         <Stack.Navigator>
             <Stack.Screen name="Organizations" component={OrganizationsScreen} />
-            <Stack.Screen name="OrganizationDetails" component={OrganizationDetailsScreen} />
-            <Stack.Screen name="GameEventDetails" component={GameEventDetailsScreen} />
+            {/*<Stack.Screen name="OrganizationDetails" component={OrganizationDetailsScreen} />*/}
+            {/*<Stack.Screen name="GameEventDetails" component={GameEventDetailsScreen} />*/}
         </Stack.Navigator>
     );
 };

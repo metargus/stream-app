@@ -1,14 +1,12 @@
 // src/services/auth.ts
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse, AuthTokens, RefreshTokenResponse, Credentials } from '../types/auth';
-
-const API_URL = 'YOUR_API_URL'; // Replace with your actual API URL
+import {User} from "../types/user.ts";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axiosInstance from './api/axiosInstance.ts';
 
 class AuthService {
     private static instance: AuthService;
-    private isRefreshingToken: boolean = false;
-    private refreshSubscribers: ((token: string) => void)[] = [];
 
     private constructor() {}
 
@@ -21,46 +19,20 @@ class AuthService {
 
     async signIn(credentials: Credentials): Promise<AuthResponse> {
         try {
-            const response = await axios.post<AuthResponse>(
-                `${API_URL}/api/auth/login`,
-                credentials,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-LiveStream-Remote': 'true'
-                    }
-                }
+            const response = await axiosInstance.post<AuthResponse>(
+                '/api/auth/login',
+                credentials
             );
-
-            await this.storeTokens({
-                accessToken: response.data.accessToken,
-                refreshToken: response.data.refreshToken,
-                refreshTokenExpiryTime: response.data.refreshTokenExpiryTime
-            });
-
+            await this.storeTokens(response.data);
             return response.data;
         } catch (error) {
             throw this.handleError(error);
         }
     }
 
-    async refreshToken(): Promise<RefreshTokenResponse> {
+    async getUser(): Promise<User> {
         try {
-            const tokens = await this.getStoredTokens();
-            if (!tokens) throw new Error('No refresh token available');
-
-            const response = await axios.get<RefreshTokenResponse>(
-                `${API_URL}/api/auth/refresh-token`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${tokens.refreshToken}`
-                    }
-                }
-            );
-
-            // Update stored access token
-            await this.updateAccessToken(response.data.accessToken);
-
+            const response = await axiosInstance.get<User>('/api/users/me');
             return response.data;
         } catch (error) {
             throw this.handleError(error);
