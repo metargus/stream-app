@@ -10,12 +10,11 @@ const Stack = createStackNavigator<MainStackParamList>();
 
 export const MainNavigator = () => {
     return (
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Organizations" component={OrganizationsScreen} />
             <Stack.Screen
                 name="Events"
                 component={EventsScreen}
-                
             />
             <Stack.Screen
                 name="GameEventDetails"

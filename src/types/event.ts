@@ -85,6 +85,7 @@ export interface GameEvent {
 export interface GameEventDetailsState {
     id: string;
     type: string;
+    title?: string;
     organization: string;
 
     dataStatus: WorkStatus;

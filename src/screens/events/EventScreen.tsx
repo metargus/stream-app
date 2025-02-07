@@ -6,7 +6,7 @@ import {
     SectionList,
     RefreshControl,
     ActivityIndicator,
-    StyleSheet,
+    StyleSheet, SafeAreaView,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -16,6 +16,7 @@ import { colors } from '../../theme/colors';
 import eventService from '../../services/event';
 import { addDays, subDays } from 'date-fns';
 import { MainStackParamList } from '../../navigation/types';
+import {Navbar} from "../organizations/NavBar.tsx";
 
 type EventsScreenNavigationProp = StackNavigationProp<MainStackParamList, 'Events'>;
 type EventsScreenRouteProp = RouteProp<MainStackParamList, 'Events'>;
@@ -93,28 +94,32 @@ export const EventsScreen = () => {
     }
 
     return (
-        <SectionList
-            sections={sections}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-                <EventRow event={item} onPress={handleEventPress} />
-            )}
-            renderSectionHeader={({ section: { title } }) => (
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>{title}</Text>
-                </View>
-            )}
-            refreshControl={
-                <RefreshControl
-                    refreshing={isRefreshing}
-                    onRefresh={handleRefresh}
-                    tintColor={colors.primary}
-                    colors={[colors.primary]}
-                />
-            }
-            contentContainerStyle={styles.contentContainer}
-            stickySectionHeadersEnabled={false}
-        />
+        <SafeAreaView>
+            <Navbar/>
+            <SectionList
+                sections={sections}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <EventRow event={item} onPress={handleEventPress} />
+                )}
+                renderSectionHeader={({ section: { title } }) => (
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>{title}</Text>
+                    </View>
+                )}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                        tintColor={colors.primary}
+                        colors={[colors.primary]}
+                    />
+                }
+                contentContainerStyle={styles.contentContainer}
+                stickySectionHeadersEnabled={false}
+            />
+        </SafeAreaView>
+       
     );
 };
 

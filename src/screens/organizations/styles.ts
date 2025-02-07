@@ -47,7 +47,8 @@ export const styles = StyleSheet.create({
     placeholderLogo: {
         width: 24,
         height: 24,
-        borderRadius: 12,
+        borderRadius: 50,
+        marginRight: 12,
         backgroundColor: colors.border,
         justifyContent: 'center',
         alignItems: 'center',

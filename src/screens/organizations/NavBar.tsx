@@ -1,42 +1,60 @@
-// src/screens/Organizations/Navbar.tsx
 import React from 'react';
-import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {View, Image, TouchableOpacity, StyleSheet, Text} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { colors } from '../../theme/colors';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigation } from '@react-navigation/native';
+import {colors} from '../../theme/colors';
+import {useAuth} from '../../contexts/AuthContext';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
-export const Navbar: React.FC = () => {
-    const { signOut } = useAuth();
+interface NavbarProps {
+    title?: string
+}
+
+export const Navbar: React.FC<NavbarProps> = ({title = null}) => {
+    const {signOut} = useAuth();
     const navigation = useNavigation();
+    const route = useRoute();
+
+    const isOrganizationsScreen = route.name === 'Organizations';
 
     const handleLogout = async () => {
         try {
             await signOut();
             navigation.reset({
                 index: 0,
-                routes: [{ name: 'Auth' }],
+                routes: [{name: 'Auth'}],
             });
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
+    const handleBack = () => {
+        navigation.goBack();
+    };
+
     return (
         <View style={styles.container}>
-            <View style={styles.leftContainer} />
+            <View style={styles.leftContainer}>
+                <TouchableOpacity
+                    onPress={isOrganizationsScreen ? handleLogout : handleBack}
+                    style={styles.leftButton}
+                >
+                    <Icon
+                        name={isOrganizationsScreen ? "log-out" : "arrow-left"}
+                        size={24}
+                        color={colors.primary}
+                        style={isOrganizationsScreen ? {transform: [{rotateY: '180deg'}]} : undefined}
+                    />
+                </TouchableOpacity>
+            </View>
             <View style={styles.centerContainer}>
-                <Image
+                {!title ? <Image
                     source={require('../../assets/logo.png')}
                     style={styles.logo}
                     resizeMode="contain"
-                />
+                /> : <Text style={styles.title}>{title}</Text>}
             </View>
-            <View style={styles.rightContainer}>
-                <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                    <Icon name="log-out" size={24} color={colors.primary} />
-                </TouchableOpacity>
-            </View>
+            <View style={styles.rightContainer}/>
         </View>
     );
 };
@@ -50,8 +68,14 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: colors.border,
     },
+    title: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.text,
+    },
     leftContainer: {
         flex: 1,
+        alignItems: 'flex-start',
     },
     centerContainer: {
         flex: 2,
@@ -64,10 +88,10 @@ const styles = StyleSheet.create({
         paddingRight: 16,
     },
     logo: {
-        height: 32,
+        height: 48,
         width: '100%',
     },
-    logoutButton: {
+    leftButton: {
         padding: 8,
     },
 });

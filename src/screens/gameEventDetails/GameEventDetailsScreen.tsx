@@ -9,7 +9,7 @@ import {
     TextInput,
     Switch,
     StyleSheet,
-    ActivityIndicator,
+    ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -20,6 +20,7 @@ import {MainStackParamList} from "../../navigation/types.ts";
 import gameEvent from "../../services/gameEvent.ts";
 import {createEventUpdateRequest, EventUpdateRequest} from "../../types/eventUpdate.ts";
 import WebView from "react-native-webview";
+import {Navbar} from "../organizations/NavBar.tsx";
 
 type TabType = 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 
@@ -28,6 +29,7 @@ export const GameEventDetailsScreen: React.FC = () => {
     const [state, setState] = useState<GameEventDetailsState>({
         id: '',
         type: '',
+        title: '',
         organization: '',
         dataStatus: { isExecuting: false, hasError: false },
         updateStartsAtStatus: { isExecuting: false, hasError: false },
@@ -66,6 +68,7 @@ export const GameEventDetailsScreen: React.FC = () => {
             setState(prev => ({
                 ...prev,
                 event,
+                title: event.title,
                 startsAt: new Date(event.startDateTime),
                 endsAt: new Date(event.endDateTime),
                 streamKey: event.broadcast?.youtubeStreamKey || '',
@@ -218,6 +221,12 @@ export const GameEventDetailsScreen: React.FC = () => {
             pictureInPicture: value
         }));
         debouncedUpdate({ isPictureInPicture: value });
+    };
+
+
+    const handleSwitchToMedia = async (mediaId: string) => {
+        if (!state.event?.broadcast?.id) return;
+        await gameEvent.switchToCommercialMedia(mediaId, state.event?.broadcast?.id, organizationId)
     };
 
     const renderTabs = () => (
@@ -447,7 +456,7 @@ export const GameEventDetailsScreen: React.FC = () => {
     const renderVideosTab = () => (
         <View style={styles.tabContent}>
             {state.event?.media && state.event.media.length > 0 ? (
-                <CommercialMediaList media={state.event.media} />
+                <CommercialMediaList media={state.event.media} onPlayMedia={handleSwitchToMedia} />
             ) : (
                 <View style={styles.emptyState}>
                     <Text style={styles.emptyStateText}>No media available</Text>
@@ -479,30 +488,38 @@ export const GameEventDetailsScreen: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
-            {state.event?.ytBroadcastDetails?.broadcastId && (
-                <View style={styles.videoContainer}>
-                    <WebView
-                        style={styles.webview}
-                        javaScriptEnabled={true}
-                        domStorageEnabled={true}
-                        source={{
-                            uri: `https://www.youtube.com/embed/${state.event.ytBroadcastDetails.broadcastId}`
-                        }}
-                    />
-                </View>
-            )}
+        <SafeAreaView style={styles.viewContainer}>
+            <Navbar title={state.title} />
+            <View style={styles.container}>
+                {state.event?.ytBroadcastDetails?.broadcastId && (
+                    <View style={styles.videoContainer}>
+                        <WebView
+                            style={styles.webview}
+                            javaScriptEnabled={true}
+                            domStorageEnabled={true}
+                            source={{
+                                uri: `https://www.youtube.com/embed/${state.event.ytBroadcastDetails.broadcastId}`
+                            }}
+                        />
+                    </View>
+                )}
 
-            {renderTabs()}
+                {renderTabs()}
 
-            <ScrollView style={styles.content}>
-                {renderContent()}
-            </ScrollView>
-        </View>
+                <ScrollView style={styles.content}>
+                    {renderContent()}
+                </ScrollView>
+            </View>
+        </SafeAreaView>
+        
     );
 };
 
 const styles = StyleSheet.create({
+    viewContainer: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
     container: {
         flex: 1,
         backgroundColor: '#F5F5F5',

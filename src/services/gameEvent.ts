@@ -148,9 +148,8 @@ class GameEventService {
         organizationId: string
     ): Promise<void> {
         try {
-            await axiosInstance.post(
-                `/api/livestreams/${broadcastId}/switch/${mediaId}`,
-                {},
+            await axiosInstance.get(
+                `/api/livestreams/${broadcastId}/switch?switchToMediaId=${mediaId}&orgId=${organizationId}`,
                 {
                     headers: {
                         'Club-ID': organizationId
