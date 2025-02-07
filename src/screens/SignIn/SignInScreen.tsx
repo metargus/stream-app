@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
 import { colors } from '../../theme/colors';
-import authService from '../../services/auth';
 import {useAuth} from "../../contexts/AuthContext.tsx";
 
 interface InputProps extends TextInputProps {
@@ -24,11 +23,11 @@ interface InputProps extends TextInputProps {
 }
 
 const FloatingLabelInput: React.FC<InputProps> = ({
-                                                      label,
-                                                      hasValue,
-                                                      isFocused,
-                                                      ...props
-                                                  }) => (
+      label,
+      hasValue,
+      isFocused,
+      ...props
+  }) => (
     <View style={styles.inputContainer}>
         <View style={[
             styles.inputWrapper,
