@@ -1,3 +1,5 @@
+import { Team } from "./team.ts";
+
 export interface Organization {
     id: string;
     name?: string;
