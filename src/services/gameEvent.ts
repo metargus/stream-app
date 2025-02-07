@@ -67,7 +67,7 @@ class GameEventService {
     ): Promise<BroadcastInfo> {
         try {
             const response = await axiosInstance.post<BroadcastInfo>(
-                `/api/broadcasts/${broadcastId}/resume`,
+                `/api/livestreams/${broadcastId}/resume`,
                 {},
                 {
                     headers: {
@@ -87,7 +87,7 @@ class GameEventService {
     ): Promise<BroadcastInfo> {
         try {
             const response = await axiosInstance.post<BroadcastInfo>(
-                `/api/broadcasts/${broadcastId}/pause`,
+                `/api/livestreams/${broadcastId}/pause`,
                 {},
                 {
                     headers: {
@@ -107,7 +107,7 @@ class GameEventService {
     ): Promise<BroadcastInfo> {
         try {
             const response = await axiosInstance.post<BroadcastInfo>(
-                `/api/broadcasts/${broadcastId}/stop`,
+                `/api/livestreams/${broadcastId}/stop`,
                 {},
                 {
                     headers: {
@@ -128,7 +128,7 @@ class GameEventService {
     ): Promise<void> {
         try {
             await axiosInstance.post(
-                `/api/broadcasts/${broadcastId}/commercial-media/${mediaId}/play`,
+                `/api/livestreams/${broadcastId}/switch/${mediaId}`,
                 {},
                 {
                     headers: {

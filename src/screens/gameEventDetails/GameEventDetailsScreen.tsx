@@ -15,7 +15,6 @@ import Icon from 'react-native-vector-icons/Feather';
 import { colors } from '../../theme/colors';
 import { GameEventDetailsState } from '../../types/event.ts';
 import { CommercialMediaList } from './CommercialMediaList';
-import YouTube from 'react-native-youtube';
 import {MainStackParamList} from "../../navigation/types.ts";
 import gameEvent from "../../services/gameEvent.ts";
 import {createEventUpdateRequest, EventUpdateRequest} from "../../types/eventUpdate.ts";
@@ -27,7 +26,7 @@ export const GameEventDetailsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('event');
     const [state, setState] = useState<GameEventDetailsState>({
         id: '',
-        kind: '',
+        type: '',
         organization: '',
         dataStatus: { isExecuting: false, hasError: false },
         updateStartsAtStatus: { isExecuting: false, hasError: false },
@@ -60,14 +59,16 @@ export const GameEventDetailsScreen: React.FC = () => {
         try {
             setIsLoading(true);
             const event = await gameEvent.getGameEvent(id, type, organizationId);
+            const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
+            const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam) || {name: ''};
             setState(prev => ({
                 ...prev,
                 event,
                 startsAt: new Date(event.startDateTime),
                 endsAt: new Date(event.endDateTime),
                 streamKey: event.broadcast?.youtubeStreamKey || '',
-                homeTeamName: event.homeTeamName || '',
-                awayTeamName: event.awayTeamName || '',
+                homeTeamName: homeTeam.name || '',
+                awayTeamName: awayTeam.name || '',
                 competitionName: event.competitionName || ''
             }));
         } catch (err) {
@@ -255,13 +256,20 @@ export const GameEventDetailsScreen: React.FC = () => {
     const renderEventTab = () => (
         <View style={styles.tabContent}>
             <View style={styles.controlButtons}>
-                <TouchableOpacity
+                {state?.event?.broadcast?.state === 'paused' ? <TouchableOpacity
                     style={styles.controlButton}
                     onPress={handleResumeBroadcast}
                 >
                     <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
                     <Text style={styles.controlButtonText}>Resume</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> : <TouchableOpacity
+                    style={styles.controlButton}
+                    onPress={handlePauseBroadcast}
+                >
+                    <Icon name="pause" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                    <Text style={styles.controlButtonText}>Pause</Text>
+                </TouchableOpacity>}
+                
 
                 <TouchableOpacity
                     style={styles.controlButton}
@@ -430,6 +438,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F5F5F5',
+    },
+    videoContainer: {
+        width: '100%',
+        aspectRatio: 16 / 9,
     },
     tabsContainer: {
         backgroundColor: colors.white,
