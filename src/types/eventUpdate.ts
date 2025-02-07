@@ -54,7 +54,7 @@ export const createEventUpdateRequest = (event: GameEvent): EventUpdateRequest =
         isBroadcast: false,
         isRecord: false,
         isCommentaryOn: false,
-        type: event.type.name,
+        type: event.broadcast?.type,
         youtubeStreamKey: event.broadcast?.youtubeStreamKey,
         youtubeStreamKey2: event.broadcast?.youtubeStreamKey2,
         eventYTConfig: event.ytBroadcastDetails,

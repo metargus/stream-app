@@ -1,6 +1,5 @@
 // src/screens/GameEventDetails/GameEventDetailsScreen.tsx
-import React, {useState, useEffect, useCallback} from 'react';
-import { debounce } from 'lodash';
+import React, {useState, useEffect} from 'react';
 import {
     View,
     Text,
@@ -65,6 +64,8 @@ export const GameEventDetailsScreen: React.FC = () => {
             const event = await gameEvent.getGameEvent(id, type, organizationId);
             const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
             const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam) || {name: ''};
+            
+            console.log(event.competitionName);
             setState(prev => ({
                 ...prev,
                 event,
@@ -161,6 +162,7 @@ export const GameEventDetailsScreen: React.FC = () => {
             if (!state.event) return;
             setIsLoading(true);
             const request = createEventUpdateRequest(state.event);
+            console.log(type)
             const updatedEvent = await gameEvent.updateGameEvent(
                 id,
                 type,
@@ -181,37 +183,16 @@ export const GameEventDetailsScreen: React.FC = () => {
         }
     };
 
-    const debouncedUpdate = useCallback(
-        debounce((updateData: Partial<EventUpdateRequest>) => {
-            handleUpdateEvent(updateData);
-        }, 500),
-        [handleUpdateEvent]
-    );
-
-    const handleHomeTeamNameChange = (text: string) => {
-        setState(prev => ({
-            ...prev,
-            homeTeamName: text
-        }));
-        debouncedUpdate({ homeTeamName: text });
+    const handleHomeTeamNameBlur = () => {
+        handleUpdateEvent({ homeTeamName: state.homeTeamName });
     };
 
-    // Modify the away team name handler
-    const handleAwayTeamNameChange = (text: string) => {
-        setState(prev => ({
-            ...prev,
-            awayTeamName: text
-        }));
-        debouncedUpdate({ awayTeamName: text });
+    const handleAwayTeamNameBlur = () => {
+        handleUpdateEvent({ awayTeamName: state.awayTeamName });
     };
 
-    // Modify the competition name handler
-    const handleCompetitionNameChange = (text: string) => {
-        setState(prev => ({
-            ...prev,
-            competitionName: text
-        }));
-        debouncedUpdate({ competitionName: text });
+    const handleCompetitionNameBlur = () => {
+        handleUpdateEvent({ competitionName: state.competitionName });
     };
 
     // Modify the picture in picture handler
@@ -220,7 +201,6 @@ export const GameEventDetailsScreen: React.FC = () => {
             ...prev,
             pictureInPicture: value
         }));
-        debouncedUpdate({ isPictureInPicture: value });
     };
 
 
@@ -399,7 +379,11 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TextInput
                     style={styles.textInput}
                     value={state.homeTeamName}
-                    onChangeText={handleHomeTeamNameChange}
+                    onChangeText={(text) => setState(prev => ({
+                        ...prev,
+                        homeTeamName: text
+                    }))}
+                    onBlur={handleHomeTeamNameBlur}
                 />
             </View>
 
@@ -408,7 +392,11 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TextInput
                     style={styles.textInput}
                     value={state.awayTeamName}
-                    onChangeText={handleAwayTeamNameChange}
+                    onChangeText={(text) => setState(prev => ({
+                        ...prev,
+                        awayTeamName: text
+                    }))}
+                    onBlur={handleAwayTeamNameBlur}
                 />
             </View>
 
@@ -417,7 +405,11 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TextInput
                     style={styles.textInput}
                     value={state.competitionName}
-                    onChangeText={handleCompetitionNameChange}
+                    onChangeText={(text) => setState(prev => ({
+                        ...prev,
+                        competitionName: text
+                    }))}
+                    onBlur={handleCompetitionNameBlur}
                 />
             </View>
         </View>
