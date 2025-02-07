@@ -15,10 +15,10 @@ import Icon from 'react-native-vector-icons/Feather';
 import { colors } from '../../theme/colors';
 import { GameEventDetailsState } from '../../types/event.ts';
 import { CommercialMediaList } from './CommercialMediaList';
-import YouTube from 'react-native-youtube';
 import {MainStackParamList} from "../../navigation/types.ts";
 import gameEvent from "../../services/gameEvent.ts";
 import {createEventUpdateRequest, EventUpdateRequest} from "../../types/eventUpdate.ts";
+import WebView from "react-native-webview";
 
 type TabType = 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 
@@ -356,15 +356,18 @@ export const GameEventDetailsScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/*{state.event?.youTubeBroadcastInfo?.id && (*/}
-            {/*    <View style={styles.videoContainer}>*/}
-            {/*        <YouTube*/}
-            {/*            apiKey='85143608215-qlrt7imi0oj8mt82l62in4lkip5c33ec.apps.googleusercontent.com'*/}
-            {/*            videoId={state.event.youTubeBroadcastInfo.id}*/}
-            {/*            style={styles.video}*/}
-            {/*        />*/}
-            {/*    </View>*/}
-            {/*)}*/}
+            {state.event?.ytBroadcastDetails?.broadcastId && (
+                <View style={styles.videoContainer}>
+                    <WebView
+                        style={styles.webview}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        source={{
+                            uri: `https://www.youtube.com/embed/${state.event.ytBroadcastDetails.broadcastId}`
+                        }}
+                    />
+                </View>
+            )}
 
             {renderTabs()}
 
@@ -380,6 +383,9 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
     },
+    webview: {
+        flex: 1,
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -388,9 +394,6 @@ const styles = StyleSheet.create({
     videoContainer: {
         width: '100%',
         aspectRatio: 16 / 9,
-    },
-    video: {
-        flex: 1,
     },
     tabContainer: {
         flexDirection: 'row',
