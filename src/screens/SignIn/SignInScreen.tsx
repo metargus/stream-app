@@ -9,6 +9,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     TextInputProps,
+    Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
@@ -77,10 +78,10 @@ export const SignInScreen: React.FC = () => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            {/*<Image*/}
-            {/*    source={require('..')}*/}
-            {/*    style={styles.logo}*/}
-            {/*/>*/}
+            <Image
+                source={require('../../assets/logo.png')}
+                style={styles.logo}
+            />
 
             <FloatingLabelInput
                 label="Username"

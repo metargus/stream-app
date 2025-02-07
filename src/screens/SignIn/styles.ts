@@ -54,7 +54,7 @@ export const styles = StyleSheet.create({
         padding: 8,
     },
     signInButton: {
-        backgroundColor: colors.primary,
+        backgroundColor: colors.controlButton,
         height: 48,
         borderRadius: 6,
         justifyContent: 'center',
