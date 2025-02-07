@@ -1,4 +1,4 @@
-import { Team } from './team';
+import {EventTeam, Team} from './team';
 
 export type BroadcastState =
     | 'scheduled'
@@ -77,13 +77,14 @@ export interface GameEvent {
     ytBroadcastDetails?: any;
     media?: any[];
     teams?: Team[];
+    eventTeams?: EventTeam[];
     startDateTime: string;
     endDateTime: string;
 }
 
 export interface GameEventDetailsState {
     id: string;
-    kind: string;
+    type: string;
     organization: string;
 
     dataStatus: WorkStatus;

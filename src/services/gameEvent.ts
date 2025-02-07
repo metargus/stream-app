@@ -22,7 +22,7 @@ class GameEventService {
         organizationId: string
     ): Promise<GameEvent> {
         try {
-            const response = await axiosInstance.get<GameEvent>(`/api/events/games/${id}`, {
+            const response = await axiosInstance.get<GameEvent>(`/api/events/game/${id}`, {
                 headers: {
                     'Club-ID': organizationId
                 },
@@ -38,20 +38,20 @@ class GameEventService {
 
     async updateGameEvent(
         id: string,
-        kind: string,
+        type: string,
         organizationId: string,
         request: EventUpdateRequest
     ): Promise<GameEvent> {
         try {
             const response = await axiosInstance.put<GameEvent>(
-                `/api/events/games/${id}`,
+                `/api/events/game/${id}`,
                 request,
                 {
                     headers: {
                         'Club-ID': organizationId
                     },
                     params: {
-                        kind
+                        type
                     }
                 }
             );
@@ -67,7 +67,7 @@ class GameEventService {
     ): Promise<BroadcastInfo> {
         try {
             const response = await axiosInstance.post<BroadcastInfo>(
-                `/api/broadcasts/${broadcastId}/resume`,
+                `/api/livestreams/${broadcastId}/resume`,
                 {},
                 {
                     headers: {
@@ -87,7 +87,7 @@ class GameEventService {
     ): Promise<BroadcastInfo> {
         try {
             const response = await axiosInstance.post<BroadcastInfo>(
-                `/api/broadcasts/${broadcastId}/pause`,
+                `/api/livestreams/${broadcastId}/pause`,
                 {},
                 {
                     headers: {
@@ -107,7 +107,7 @@ class GameEventService {
     ): Promise<BroadcastInfo> {
         try {
             const response = await axiosInstance.post<BroadcastInfo>(
-                `/api/broadcasts/${broadcastId}/stop`,
+                `/api/livestreams/${broadcastId}/stop`,
                 {},
                 {
                     headers: {
@@ -128,7 +128,7 @@ class GameEventService {
     ): Promise<void> {
         try {
             await axiosInstance.post(
-                `/api/broadcasts/${broadcastId}/commercial-media/${mediaId}/play`,
+                `/api/livestreams/${broadcastId}/switch/${mediaId}`,
                 {},
                 {
                     headers: {
