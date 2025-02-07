@@ -19,6 +19,7 @@ import YouTube from 'react-native-youtube';
 import {MainStackParamList} from "../../navigation/types.ts";
 import gameEvent from "../../services/gameEvent.ts";
 import {createEventUpdateRequest, EventUpdateRequest} from "../../types/eventUpdate.ts";
+import WebView from "react-native-webview";
 
 type TabType = 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 
@@ -26,7 +27,7 @@ export const GameEventDetailsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('event');
     const [state, setState] = useState<GameEventDetailsState>({
         id: '',
-        type: '',
+        kind: '',
         organization: '',
         dataStatus: { isExecuting: false, hasError: false },
         updateStartsAtStatus: { isExecuting: false, hasError: false },
@@ -59,16 +60,14 @@ export const GameEventDetailsScreen: React.FC = () => {
         try {
             setIsLoading(true);
             const event = await gameEvent.getGameEvent(id, type, organizationId);
-            const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
-            const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam ) || {name: ''};
             setState(prev => ({
                 ...prev,
                 event,
-                startDateTime: new Date(event.startDateTime),
-                ensDateTime: new Date(event.endDateTime),
+                startsAt: new Date(event.startDateTime),
+                endsAt: new Date(event.endDateTime),
                 streamKey: event.broadcast?.youtubeStreamKey || '',
-                homeTeamName: homeTeam?.name || '',
-                awayTeamName: awayTeam?.name || '',
+                homeTeamName: event.homeTeamName || '',
+                awayTeamName: event.awayTeamName || '',
                 competitionName: event.competitionName || ''
             }));
         } catch (err) {
@@ -152,7 +151,6 @@ export const GameEventDetailsScreen: React.FC = () => {
         }
     };
 
-// Update the tab rendering and styles in GameEventDetailsScreen.tsx
     const renderTabs = () => (
         <View style={styles.tabsContainer}>
             <View style={styles.tabsRow}>
@@ -238,7 +236,7 @@ export const GameEventDetailsScreen: React.FC = () => {
             </View>
         </View>
     );
-    
+
     const renderContent = () => {
         switch (activeTab) {
             case 'event':
@@ -268,6 +266,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TouchableOpacity
                     style={styles.controlButton}
                     onPress={handleStopBroadcast}
+                    disabled={isLoading}
                 >
                     <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
                     <Text style={styles.controlButtonText}>Stop</Text>
@@ -307,7 +306,7 @@ export const GameEventDetailsScreen: React.FC = () => {
             </View>
         </View>
     );
-    
+
     const renderGameDetailsTab = () => (
         <View style={styles.tabContent}>
             <View style={styles.inputContainer}>
@@ -405,15 +404,18 @@ export const GameEventDetailsScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/*{state.event?.youTubeBroadcastInfo?.id && (*/}
-            {/*    <View style={styles.videoContainer}>*/}
-            {/*        <YouTube*/}
-            {/*            apiKey='85143608215-qlrt7imi0oj8mt82l62in4lkip5c33ec.apps.googleusercontent.com'*/}
-            {/*            videoId={state.event.youTubeBroadcastInfo.id}*/}
-            {/*            style={styles.video}*/}
-            {/*        />*/}
-            {/*    </View>*/}
-            {/*)}*/}
+            {state.event?.ytBroadcastDetails?.broadcastId && (
+                <View style={styles.videoContainer}>
+                    <WebView
+                        style={styles.webview}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
+                        source={{
+                            uri: `https://www.youtube.com/embed/${state.event.ytBroadcastDetails.broadcastId}`
+                        }}
+                    />
+                </View>
+            )}
 
             {renderTabs()}
 
@@ -442,6 +444,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
+    },
+    webview: {
+        flex: 1,
     },
     loadingContainer: {
         flex: 1,

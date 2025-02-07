@@ -1,6 +1,6 @@
 // src/types/eventUpdate.ts
 import { CommercialMedia, GameEvent } from './event.ts';
-import { YouTubeBroadcastInfo } from './youtubeVideo.ts';
+import { ytBroadcastDetails } from './youtubeVideo.ts';
 
 export interface EventUpdateRequest {
     teamIds?: string[];
@@ -16,7 +16,7 @@ export interface EventUpdateRequest {
     type?: string;
     youtubeStreamKey?: string;
     youtubeStreamKey2?: string;
-    eventYTConfig?: YouTubeBroadcastInfo;
+    eventYTConfig?: ytBroadcastDetails;
 
     homeTeamName?: string;
     homeTeamLogoPreview?: string;
@@ -57,7 +57,7 @@ export const createEventUpdateRequest = (event: GameEvent): EventUpdateRequest =
         type: event.type.name,
         youtubeStreamKey: event.broadcast?.youtubeStreamKey,
         youtubeStreamKey2: event.broadcast?.youtubeStreamKey2,
-        eventYTConfig: event.youTubeBroadcastInfo,
+        eventYTConfig: event.ytBroadcastDetails,
         homeTeamName: event.homeTeamName,
         awayTeamName: event.awayTeamName,
         homeTeamLogoPreview: event.homeTeamLogo,
@@ -88,7 +88,7 @@ export interface EventUpdate {
     type?: string;
     youtubeStreamKey?: string;
     youtubeStreamKey2?: string;
-    eventYTConfig?: YouTubeBroadcastInfo;
+    eventYTConfig?: ytBroadcastDetails;
     homeTeamName?: string;
     homeTeamLogoPreview?: string;
     awayTeamName?: string;

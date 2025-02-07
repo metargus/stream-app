@@ -40,7 +40,7 @@ export const convertOptionsToParams = (options: PlayerOption[]): Record<string, 
     }, {} as Record<string, number>);
 };
 
-export interface YouTubeBroadcastInfo {
+export interface ytBroadcastDetails {
     broadcastId?: string;      
     broadcastTitle?: string;   
     visibility?: string;

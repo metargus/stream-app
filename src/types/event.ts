@@ -74,7 +74,7 @@ export interface GameEvent {
     competitionName?: string;
     competitionLogo?: string;
     broadcast?: BroadcastInfo;
-    youTubeBroadcastInfo?: any;
+    ytBroadcastDetails?: any;
     media?: any[];
     teams?: Team[];
     eventTeams?: EventTeam[];
