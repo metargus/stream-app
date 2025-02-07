@@ -22,7 +22,7 @@ import {createEventUpdateRequest, EventUpdateRequest} from "../../types/eventUpd
 
 type TabType = 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 
-export const GameEventDetailsScreen = () => {
+export const GameEventDetailsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('event');
     const [state, setState] = useState<GameEventDetailsState>({
         id: '',
@@ -356,14 +356,15 @@ export const GameEventDetailsScreen = () => {
 
     return (
         <View style={styles.container}>
-            {state.event?.youTubeBroadcastInfo?.id && (
-                <View style={styles.videoContainer}>
-                    <YouTube
-                        videoId={state.event.youTubeBroadcastInfo.id}
-                        style={styles.video}
-                    />
-                </View>
-            )}
+            {/*{state.event?.youTubeBroadcastInfo?.id && (*/}
+            {/*    <View style={styles.videoContainer}>*/}
+            {/*        <YouTube*/}
+            {/*            apiKey='85143608215-qlrt7imi0oj8mt82l62in4lkip5c33ec.apps.googleusercontent.com'*/}
+            {/*            videoId={state.event.youTubeBroadcastInfo.id}*/}
+            {/*            style={styles.video}*/}
+            {/*        />*/}
+            {/*    </View>*/}
+            {/*)}*/}
 
             {renderTabs()}
 
@@ -480,7 +481,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 12,
-        borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: colors.border,
     },
     toggleLabel: {

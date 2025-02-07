@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { MainStackParamList } from './types';
 import { OrganizationsScreen } from '../screens/organizations/OrganizationsScreen.tsx';
 import { EventsScreen} from "../screens/events/EventScreen.tsx";
-import {GameEventDetailsScreen} from "../screens/gameEventDetails/GameEventDetailsScreen.tsx";
+import { GameEventDetailsScreen } from "../screens/gameEventDetails/GameEventDetailsScreen.tsx";
 
 const Stack = createStackNavigator<MainStackParamList>();
 
