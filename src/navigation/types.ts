@@ -11,6 +11,10 @@ export type AuthStackParamList = {
 export type MainStackParamList = {
     Organizations: undefined;
     OrganizationDetails: { id: string };
-    GameEventDetails: { id: string };
     Events: { organizationId: string };
+    GameEventDetails: {
+        id: string;
+        organizationId: string;
+        type: string;
+    };
 };

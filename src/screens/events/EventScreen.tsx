@@ -76,7 +76,8 @@ export const EventsScreen = () => {
     const handleEventPress = (event: GameEvent) => {
         navigation.navigate('GameEventDetails', {
             id: event.id,
-            organizationId
+            organizationId,
+            type: event.type.code
         });
     };
 

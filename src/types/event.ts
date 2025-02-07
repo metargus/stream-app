@@ -1,5 +1,33 @@
 import { Team } from './team';
 
+export type BroadcastState =
+    | 'scheduled'
+    | 'creating'
+    | 'running'
+    | 'finished'
+    | 'paused'
+    | 'cancelled'
+    | 'errored'
+    | 'deleting';
+
+export type BroadcastKind = 'full' | 'lite' | 'panoramic';
+
+export interface CommercialMedia {
+    id: string;
+    fileName?: string;
+    url?: string;
+    type?: string;
+    duration?: number;
+    size?: number;
+    uploadedAt?: string;
+}
+
+export interface WorkStatus {
+    isExecuting: boolean;
+    error?: Error | null;
+    hasError: boolean;
+}
+
 // src/types/event.ts
 export interface EventKind {
     id: string;
@@ -14,13 +42,13 @@ export interface BroadcastInfo {
     streamerInputUrl?: string;
     youtubeStreamKey?: string;
     youtubeStreamKey2?: string;
-    state?: 'scheduled' | 'creating' | 'running' | 'finished' | 'paused' | 'cancelled' | 'errored' | 'deleting';
+    state?: BroadcastState;
     courtTopLeftLogo?: string;
     courtTopRightLogo?: string;
     courtBottomLeftLogo?: string;
     courtBottomRightLogo?: string;
     courtCenterLogo?: string;
-    type?: string;
+    type?: BroadcastKind;
     saveType?: string;
     streamerSaveUrl?: string;
     isCommentaryOn: boolean;
@@ -51,4 +79,36 @@ export interface GameEvent {
     teams?: Team[];
     startDateTime: string;
     endDateTime: string;
+}
+
+export interface GameEventDetailsState {
+    id: string;
+    kind: string;
+    organization: string;
+
+    dataStatus: WorkStatus;
+    event?: GameEvent;
+
+    updateStartsAtStatus: WorkStatus;
+    startsAt: Date;
+
+    updateEndsAtStatus: WorkStatus;
+    endsAt: Date;
+
+    updateStreamKeyStatus: WorkStatus;
+    streamKey: string;
+
+    updateHomeTeamNameStatus: WorkStatus;
+    homeTeamName: string;
+
+    updateAwayTeamNameStatus: WorkStatus;
+    awayTeamName: string;
+
+    updateCompetitionNameStatus: WorkStatus;
+    competitionName: string;
+
+    updatePictureInPictureStatus: WorkStatus;
+    pictureInPicture: boolean;
+
+    editableSection: 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 }
