@@ -1,5 +1,6 @@
 // src/screens/GameEventDetails/GameEventDetailsScreen.tsx
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
+import { debounce } from 'lodash';
 import {
     View,
     Text,
@@ -43,6 +44,7 @@ export const GameEventDetailsScreen: React.FC = () => {
         awayTeamName: '',
         competitionName: '',
         pictureInPicture: false,
+        isCommentaryOn: false,
         editableSection: 'event'
     });
 
@@ -69,7 +71,8 @@ export const GameEventDetailsScreen: React.FC = () => {
                 streamKey: event.broadcast?.youtubeStreamKey || '',
                 homeTeamName: homeTeam.name || '',
                 awayTeamName: awayTeam.name || '',
-                competitionName: event.competitionName || ''
+                competitionName: event.competitionName || '',
+                isCommentaryOn: event.broadcast?.isCommentaryOn || false
             }));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load event');
@@ -89,6 +92,29 @@ export const GameEventDetailsScreen: React.FC = () => {
             await fetchEventDetails();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to resume broadcast');
+            await fetchEventDetails();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleChangeCommentary = async () => {
+        try {
+            if (!state.event?.broadcast?.id) return;
+            setIsLoading(true);
+            setState(prev => ({
+                ...prev,
+                isCommentaryOn: !prev.isCommentaryOn
+            }));
+            await gameEvent.changeCommentary(
+                state.event.broadcast.id,
+                organizationId,
+                !state.isCommentaryOn
+            );
+            await fetchEventDetails();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to resume broadcast');
+            await fetchEventDetails();
         } finally {
             setIsLoading(false);
         }
@@ -150,6 +176,48 @@ export const GameEventDetailsScreen: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const debouncedUpdate = useCallback(
+        debounce((updateData: Partial<EventUpdateRequest>) => {
+            handleUpdateEvent(updateData);
+        }, 500),
+        [handleUpdateEvent]
+    );
+
+    const handleHomeTeamNameChange = (text: string) => {
+        setState(prev => ({
+            ...prev,
+            homeTeamName: text
+        }));
+        debouncedUpdate({ homeTeamName: text });
+    };
+
+    // Modify the away team name handler
+    const handleAwayTeamNameChange = (text: string) => {
+        setState(prev => ({
+            ...prev,
+            awayTeamName: text
+        }));
+        debouncedUpdate({ awayTeamName: text });
+    };
+
+    // Modify the competition name handler
+    const handleCompetitionNameChange = (text: string) => {
+        setState(prev => ({
+            ...prev,
+            competitionName: text
+        }));
+        debouncedUpdate({ competitionName: text });
+    };
+
+    // Modify the picture in picture handler
+    const handlePictureInPictureChange = (value: boolean) => {
+        setState(prev => ({
+            ...prev,
+            pictureInPicture: value
+        }));
+        debouncedUpdate({ isPictureInPicture: value });
     };
 
     const renderTabs = () => (
@@ -322,7 +390,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TextInput
                     style={styles.textInput}
                     value={state.homeTeamName}
-                    onChangeText={(text) => setState(prev => ({ ...prev, homeTeamName: text }))}
+                    onChangeText={handleHomeTeamNameChange}
                 />
             </View>
 
@@ -331,7 +399,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TextInput
                     style={styles.textInput}
                     value={state.awayTeamName}
-                    onChangeText={(text) => setState(prev => ({ ...prev, awayTeamName: text }))}
+                    onChangeText={handleAwayTeamNameChange}
                 />
             </View>
 
@@ -340,7 +408,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <TextInput
                     style={styles.textInput}
                     value={state.competitionName}
-                    onChangeText={(text) => setState(prev => ({ ...prev, competitionName: text }))}
+                    onChangeText={handleCompetitionNameChange}
                 />
             </View>
         </View>
@@ -352,7 +420,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Text style={styles.toggleLabel}>Picture in Picture</Text>
                 <Switch
                     value={state.pictureInPicture}
-                    onValueChange={(value) => setState(prev => ({ ...prev, pictureInPicture: value }))}
+                    onValueChange={handlePictureInPictureChange}
                 />
             </View>
 
@@ -367,8 +435,8 @@ export const GameEventDetailsScreen: React.FC = () => {
             <View style={styles.toggleContainer}>
                 <Text style={styles.toggleLabel}>Audio Input</Text>
                 <Switch
-                    value={false}
-                    onValueChange={() => {}}
+                    value={state.isCommentaryOn}
+                    onValueChange={handleChangeCommentary}
                 />
             </View>
 

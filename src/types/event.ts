@@ -110,6 +110,7 @@ export interface GameEventDetailsState {
 
     updatePictureInPictureStatus: WorkStatus;
     pictureInPicture: boolean;
+    isCommentaryOn: boolean;
 
     editableSection: 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 }

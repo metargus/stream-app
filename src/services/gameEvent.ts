@@ -42,8 +42,9 @@ class GameEventService {
         organizationId: string,
         request: EventUpdateRequest
     ): Promise<GameEvent> {
+        console.log(request)
         try {
-            const response = await axiosInstance.put<GameEvent>(
+            const response = await axiosInstance.patch<GameEvent>(
                 `/api/events/game/${id}`,
                 request,
                 {
@@ -57,6 +58,7 @@ class GameEventService {
             );
             return response.data;
         } catch (error) {
+            console.log(error);
             throw this.handleError(error);
         }
     }
@@ -109,6 +111,27 @@ class GameEventService {
             const response = await axiosInstance.post<BroadcastInfo>(
                 `/api/livestreams/${broadcastId}/stop`,
                 {},
+                {
+                    headers: {
+                        'Club-ID': organizationId
+                    }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
+    async changeCommentary(
+        broadcastId: string,
+        organizationId: string,
+        commentary: boolean
+    ): Promise<BroadcastInfo> {
+        try {
+            const response = await axiosInstance.patch<BroadcastInfo>(
+                `/api/livestreams/${broadcastId}/commentary`,
+                {on: commentary},
                 {
                     headers: {
                         'Club-ID': organizationId

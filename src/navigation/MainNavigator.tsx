@@ -15,12 +15,11 @@ export const MainNavigator = () => {
             <Stack.Screen
                 name="Events"
                 component={EventsScreen}
-                options={({ route }) => ({title: 'Events'})}
+                
             />
             <Stack.Screen
                 name="GameEventDetails"
                 component={GameEventDetailsScreen}
-                options={({ route }) => ({title: 'Event Details'})}
             />
         </Stack.Navigator>
     );
