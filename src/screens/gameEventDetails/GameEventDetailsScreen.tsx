@@ -26,7 +26,7 @@ export const GameEventDetailsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('event');
     const [state, setState] = useState<GameEventDetailsState>({
         id: '',
-        kind: '',
+        type: '',
         organization: '',
         dataStatus: { isExecuting: false, hasError: false },
         updateStartsAtStatus: { isExecuting: false, hasError: false },
@@ -59,14 +59,16 @@ export const GameEventDetailsScreen: React.FC = () => {
         try {
             setIsLoading(true);
             const event = await gameEvent.getGameEvent(id, type, organizationId);
+            const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
+            const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam ) || {name: ''};
             setState(prev => ({
                 ...prev,
                 event,
-                startsAt: new Date(event.startDateTime),
-                endsAt: new Date(event.endDateTime),
+                startDateTime: new Date(event.startDateTime),
+                ensDateTime: new Date(event.endDateTime),
                 streamKey: event.broadcast?.youtubeStreamKey || '',
-                homeTeamName: event.homeTeamName || '',
-                awayTeamName: event.awayTeamName || '',
+                homeTeamName: homeTeam?.name || '',
+                awayTeamName: awayTeam?.name || '',
                 competitionName: event.competitionName || ''
             }));
         } catch (err) {
@@ -150,42 +152,93 @@ export const GameEventDetailsScreen: React.FC = () => {
         }
     };
 
+// Update the tab rendering and styles in GameEventDetailsScreen.tsx
     const renderTabs = () => (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabContainer}>
-            <TouchableOpacity
-                style={[styles.tab, activeTab === 'event' && styles.activeTab]}
-                onPress={() => setActiveTab('event')}
-            >
-                <Icon name="calendar" size={20} color={activeTab === 'event' ? colors.primary : colors.textSecondary} />
-                <Text style={[styles.tabText, activeTab === 'event' && styles.activeTabText]}>Event</Text>
-            </TouchableOpacity>
+        <View style={styles.tabsContainer}>
+            <View style={styles.tabsRow}>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'event' && styles.activeTab]}
+                    onPress={() => setActiveTab('event')}
+                >
+                    <Icon
+                        name="box"
+                        size={18}
+                        color={activeTab === 'event' ? colors.tabIndicator : colors.inactiveTab}
+                    />
+                    <Text
+                        style={[
+                            styles.tabText,
+                            activeTab === 'event' && styles.activeTabText
+                        ]}
+                    >
+                        Event
+                    </Text>
+                    {activeTab === 'event' && <View style={styles.activeIndicator} />}
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                style={[styles.tab, activeTab === 'gameDetails' && styles.activeTab]}
-                onPress={() => setActiveTab('gameDetails')}
-            >
-                <Icon name="activity" size={20} color={activeTab === 'gameDetails' ? colors.primary : colors.textSecondary} />
-                <Text style={[styles.tabText, activeTab === 'gameDetails' && styles.activeTabText]}>Game Details</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'gameDetails' && styles.activeTab]}
+                    onPress={() => setActiveTab('gameDetails')}
+                >
+                    <Icon
+                        name="activity"
+                        size={18}
+                        color={activeTab === 'gameDetails' ? colors.tabIndicator : colors.inactiveTab}
+                    />
+                    <Text
+                        style={[
+                            styles.tabText,
+                            activeTab === 'gameDetails' && styles.activeTabText
+                        ]}
+                    >
+                        Game Details
+                    </Text>
+                    {activeTab === 'gameDetails' && <View style={styles.activeIndicator} />}
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                style={[styles.tab, activeTab === 'cameraAndAudio' && styles.activeTab]}
-                onPress={() => setActiveTab('cameraAndAudio')}
-            >
-                <Icon name="camera" size={20} color={activeTab === 'cameraAndAudio' ? colors.primary : colors.textSecondary} />
-                <Text style={[styles.tabText, activeTab === 'cameraAndAudio' && styles.activeTabText]}>Camera & Audio</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'cameraAndAudio' && styles.activeTab]}
+                    onPress={() => setActiveTab('cameraAndAudio')}
+                >
+                    <Icon
+                        name="volume-2"
+                        size={18}
+                        color={activeTab === 'cameraAndAudio' ? colors.tabIndicator : colors.inactiveTab}
+                    />
+                    <Text
+                        style={[
+                            styles.tabText,
+                            activeTab === 'cameraAndAudio' && styles.activeTabText
+                        ]}
+                    >
+                        Camera & Audio
+                    </Text>
+                    {activeTab === 'cameraAndAudio' && <View style={styles.activeIndicator} />}
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                style={[styles.tab, activeTab === 'videos' && styles.activeTab]}
-                onPress={() => setActiveTab('videos')}
-            >
-                <Icon name="video" size={20} color={activeTab === 'videos' ? colors.primary : colors.textSecondary} />
-                <Text style={[styles.tabText, activeTab === 'videos' && styles.activeTabText]}>Videos</Text>
-            </TouchableOpacity>
-        </ScrollView>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'videos' && styles.activeTab]}
+                    onPress={() => setActiveTab('videos')}
+                >
+                    <Icon
+                        name="video"
+                        size={18}
+                        color={activeTab === 'videos' ? colors.tabIndicator : colors.inactiveTab}
+                    />
+                    <Text
+                        style={[
+                            styles.tabText,
+                            activeTab === 'videos' && styles.activeTabText
+                        ]}
+                    >
+                        Videos
+                    </Text>
+                    {activeTab === 'videos' && <View style={styles.activeIndicator} />}
+                </TouchableOpacity>
+            </View>
+        </View>
     );
-
+    
     const renderContent = () => {
         switch (activeTab) {
             case 'event':
@@ -204,61 +257,57 @@ export const GameEventDetailsScreen: React.FC = () => {
     const renderEventTab = () => (
         <View style={styles.tabContent}>
             <View style={styles.controlButtons}>
-                {state.event?.broadcast?.state === 'paused' ? (
-                    <TouchableOpacity
-                        style={styles.controlButton}
-                        onPress={handleResumeBroadcast}
-                        disabled={isLoading}
-                    >
-                        <Icon name="play" size={24} color={colors.white} />
-                        <Text style={styles.controlButtonText}>Resume</Text>
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity
-                        style={styles.controlButton}
-                        onPress={handlePauseBroadcast}
-                        disabled={isLoading}
-                    >
-                        <Icon name="pause" size={24} color={colors.white} />
-                        <Text style={styles.controlButtonText}>Pause</Text>
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                    style={styles.controlButton}
+                    onPress={handleResumeBroadcast}
+                >
+                    <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                    <Text style={styles.controlButtonText}>Resume</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                     style={styles.controlButton}
                     onPress={handleStopBroadcast}
-                    disabled={isLoading}
                 >
-                    <Icon name="stop" size={24} color={colors.white} />
+                    <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
                     <Text style={styles.controlButtonText}>Stop</Text>
                 </TouchableOpacity>
             </View>
 
-            {/* Date/Time fields */}
-            <View style={styles.inputContainer}>
+            <View style={styles.inputGroup}>
                 <Text style={styles.label}>Starts at</Text>
-                <TouchableOpacity style={styles.dateInput}>
-                    <Text>{state.startsAt.toLocaleString()}</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Ends at</Text>
-                <TouchableOpacity style={styles.dateInput}>
-                    <Text>{state.endsAt.toLocaleString()}</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Stream Key</Text>
                 <TextInput
-                    style={styles.textInput}
-                    value={state.streamKey}
-                    onChangeText={(text) => setState(prev => ({ ...prev, streamKey: text }))}
+                    style={styles.input}
+                    value={state.startsAt.toLocaleString()}
+                    editable={false}
                 />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Ends at</Text>
+                <TextInput
+                    style={styles.input}
+                    value={state.endsAt.toLocaleString()}
+                    editable={false}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>Stream Key</Text>
+                <View style={styles.streamKeyContainer}>
+                    <TextInput
+                        style={[styles.input, { flex: 1 }]}
+                        value={state.streamKey}
+                        onChangeText={(text) => setState(prev => ({ ...prev, streamKey: text }))}
+                    />
+                    <TouchableOpacity>
+                        <Icon name="copy" size={20} color={colors.textSecondary} style={styles.copyIcon} />
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
-
+    
     const renderGameDetailsTab = () => (
         <View style={styles.tabContent}>
             <View style={styles.inputContainer}>
@@ -378,74 +427,143 @@ export const GameEventDetailsScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: '#F5F5F5',
+    },
+    tabsContainer: {
+        backgroundColor: colors.white,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 3,
+        paddingTop: 8,
+    },
+    tabsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    videoContainer: {
-        width: '100%',
-        aspectRatio: 16 / 9,
-    },
-    video: {
-        flex: 1,
-    },
-    tabContainer: {
-        flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        paddingHorizontal: 16,
+    tabsScrollContent: {
+        paddingHorizontal: 0,
     },
     tab: {
-        flexDirection: 'row',
+        flex: 1,
         alignItems: 'center',
-        padding: 16,
-        marginRight: 16,
+        justifyContent: 'center',
+        paddingVertical: 12,
+        position: 'relative',
     },
     activeTab: {
-        borderBottomWidth: 2,
-        borderBottomColor: colors.primary,
+        backgroundColor: colors.white,
     },
     tabText: {
-        marginLeft: 8,
-        color: colors.textSecondary,
+        fontSize: 12,
+        color: colors.inactiveTab,
+        marginTop: 4,
+        textAlign: 'center',
     },
     activeTabText: {
-        color: colors.primary,
+        color: colors.tabIndicator,
+        fontWeight: '500',
+    },
+    activeIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 2,
+        backgroundColor: colors.tabIndicator,
+    },
+    tabIndicator: {
+        height: 1,
+        backgroundColor: colors.border,
     },
     content: {
         flex: 1,
     },
     tabContent: {
         padding: 16,
+        backgroundColor: colors.cardBackground,
+        margin: 16,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     controlButtons: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 16,
+        gap: 12,
+        marginBottom: 20,
     },
     controlButton: {
         flex: 1,
-        flexDirection: 'row',
+        backgroundColor: colors.controlButton,
+        borderRadius: 8,
+        paddingVertical: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.primary,
-        padding: 12,
-        borderRadius: 8,
-        marginHorizontal: 8,
+        flexDirection: 'row',
     },
     controlButtonText: {
         color: colors.white,
-        marginLeft: 8,
+        fontSize: 16,
     },
     inputContainer: {
         marginBottom: 16,
     },
+    inputGroup: {
+        marginBottom: 16,
+        backgroundColor: colors.cardBackground,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.divider,
+        paddingVertical: 8,
+    },
     label: {
         color: colors.textSecondary,
-        marginBottom: 8,
+        fontSize: 14,
+        marginBottom: 4,
+    },
+    input: {
+        fontSize: 16,
+        color: colors.text,
+        paddingVertical: 4,
+        backgroundColor: colors.cardBackground,
+    },
+    streamKeyContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    copyIcon: {
+        padding: 8,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.divider,
+        marginVertical: 8,
+    },
+    toggleContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomColor: colors.border,
+    },
+    toggleLabel: {
+        fontSize: 16,
+        color: colors.text,
+    },
+    actionContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 16,
+        gap: 16,
     },
     textInput: {
         borderWidth: 1,
@@ -475,36 +593,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 16,
         textAlign: 'center',
-    },
-    toggleContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 12,
-        borderBottomColor: colors.border,
-    },
-    toggleLabel: {
-        fontSize: 16,
-        color: colors.text,
-    },
-    actionContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 16,
-        gap: 16,
-    },
-    actionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 8,
-        borderRadius: 8,
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    actionButtonText: {
-        marginLeft: 8,
-        color: colors.text,
     },
     card: {
         backgroundColor: colors.surface,

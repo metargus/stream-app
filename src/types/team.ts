@@ -6,3 +6,13 @@ export interface Team {
     createdAt?: string;
     updatedAt?: string;
 }
+
+export interface EventTeam {
+    id: string;
+    name?: string;
+    logoUrl?: string;
+    isHomeTeam: boolean;
+    logoBase64?: string;
+    threeLetterIdentifier: string;
+    teamId?: string;
+}

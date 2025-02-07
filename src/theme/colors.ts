@@ -10,4 +10,10 @@ export const colors = {
     error: '#FF3B30',
     white: '#FFFFFF',
     transparent: 'transparent',
+    controlButton: '#E57373',
+    cardBackground: '#FFFFFF',
+    inputBackground: '#F5F5F5',
+    divider: '#EEEEEE',
+    tabIndicator: '#E57373',
+    inactiveTab: '#757575',
 };

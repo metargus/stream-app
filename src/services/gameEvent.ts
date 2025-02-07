@@ -22,7 +22,7 @@ class GameEventService {
         organizationId: string
     ): Promise<GameEvent> {
         try {
-            const response = await axiosInstance.get<GameEvent>(`/api/events/games/${id}`, {
+            const response = await axiosInstance.get<GameEvent>(`/api/events/game/${id}`, {
                 headers: {
                     'Club-ID': organizationId
                 },
@@ -38,20 +38,20 @@ class GameEventService {
 
     async updateGameEvent(
         id: string,
-        kind: string,
+        type: string,
         organizationId: string,
         request: EventUpdateRequest
     ): Promise<GameEvent> {
         try {
             const response = await axiosInstance.put<GameEvent>(
-                `/api/events/games/${id}`,
+                `/api/events/game/${id}`,
                 request,
                 {
                     headers: {
                         'Club-ID': organizationId
                     },
                     params: {
-                        kind
+                        type
                     }
                 }
             );
