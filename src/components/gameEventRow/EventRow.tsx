@@ -30,13 +30,12 @@ export const EventRow: React.FC<Props> = ({ event, onPress }) => {
 };
 
 function isEventLive(event: GameEvent): boolean {
-    const now = new Date();
-    const startDate = new Date(event.startDateTime);
-    const endDate = new Date(event.endDateTime);
-    return startDate <= now && endDate >= now;
+    const broadcastState = event.broadcast?.state;
+    return broadcastState === 'running';
 }
 
 function isEventPast(event: GameEvent): boolean {
+    if (event.broadcast?.state === 'finished') return true;
     const now = new Date();
     const endDate = new Date(event.endDateTime);
     return endDate < now;

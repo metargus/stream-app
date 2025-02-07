@@ -43,17 +43,20 @@ export const EventsScreen = () => {
             const now = new Date();
             const events = await eventService.getGameEvents(
                 organizationId,
-                subDays(now, 1), // Get events from 1 month ago
-                addDays(now, 1)  // Get events up to 2 months in the future
+                subDays(now, 7), // Get events from 1 month ago
+                addDays(now, 7)  // Get events up to 2 months in the future
             );
 
             // Split events into upcoming and past
-            const upcoming = events.filter(e => new Date(e.endDateTime) >= now);
-            const past = events.filter(e => new Date(e.endDateTime) < now);
+            const running = events.filter(e => e.broadcast?.state === 'running');
+            const upcoming = events.filter(e => new Date(e.endDateTime) >= now && e.broadcast?.state !== 'running');
+            const past = events.filter(e => new Date(e.endDateTime) < now && e.broadcast?.state !== 'running');
+            // const upcoming = events.filter(e => e.broadcast?.state === 'scheduled');
+            // const past = events.filter(e => e.broadcast?.state === 'finished' || e.broadcast?.state === 'errored' || e.broadcast?.state === 'cancelled');
             
-            console.log(past)
 
             setSections([
+                { title: 'LIVE', data: running },
                 { title: 'UPCOMING', data: upcoming },
                 { title: 'PAST EVENTS', data: past },
             ]);

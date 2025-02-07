@@ -42,7 +42,6 @@ class GameEventService {
         organizationId: string,
         request: EventUpdateRequest
     ): Promise<GameEvent> {
-        console.log(request)
         try {
             const response = await axiosInstance.patch<GameEvent>(
                 `/api/events/game/${id}`,
@@ -58,7 +57,6 @@ class GameEventService {
             );
             return response.data;
         } catch (error) {
-            console.log(error);
             throw this.handleError(error);
         }
     }

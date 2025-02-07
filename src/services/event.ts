@@ -31,7 +31,20 @@ class EventService {
                     'Club-ID': organizationId
                 }
             });
-            console.log(response);
+            const runningBroadcasts = await this?.getRunningBroadcasts(organizationId)
+            // Loop through each item in firstArray
+            runningBroadcasts.forEach(firstItem => {
+                const stateToMatch = firstItem?.broadcast?.state;
+                const idToMatch = firstItem?.broadcast?.id;
+
+                // Update the state in secondArray where the broadcast id matches
+                response.data.forEach(secondItem => {
+                    if (secondItem.broadcast && secondItem.broadcast.id === idToMatch) {
+                        secondItem.broadcast.state = stateToMatch;
+                    }
+                });
+            });
+            console.log(response)
             return response.data.sort((a, b) =>
                 new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()
             );
