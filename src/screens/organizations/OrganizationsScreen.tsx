@@ -54,7 +54,7 @@ export const OrganizationsScreen: React.FC = () => {
     };
 
     const handleOrganizationPress = (organization: Organization) => {
-        navigation.navigate('OrganizationDetails', { id: organization.id });
+        navigation.navigate('Events', { organizationId: organization.id });
     };
 
     const renderItem: ListRenderItem<Organization> = ({ item }) => (

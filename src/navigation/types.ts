@@ -12,4 +12,5 @@ export type MainStackParamList = {
     Organizations: undefined;
     OrganizationDetails: { id: string };
     GameEventDetails: { id: string };
+    Events: { organizationId: string };
 };
