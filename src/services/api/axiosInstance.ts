@@ -1,5 +1,6 @@
 // src/services/api/axios-instance.ts
 import axios, { AxiosError, AxiosInstance } from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = 'https://api-dev.mismatch.gr'; // Replace with your actual API URL
@@ -44,6 +45,7 @@ axiosInstance.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
+        const { signOut } = useAuth();
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {
@@ -62,9 +64,11 @@ axiosInstance.interceptors.response.use(
 
             try {
                 const tokens = await AsyncStorage.getItem('auth_tokens');
-                if (!tokens) throw new Error('No refresh token available');
+                if (!tokens) return new Error('No refresh token available');
 
                 const { refreshToken } = JSON.parse(tokens);
+                
+                if (!refreshToken) await signOut();
                 const response = await axios.get(`${API_URL}/api/auth/refresh-token`, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -84,9 +88,12 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
+
+                if (axios.isAxiosError(refreshError) && refreshError.response?.status === 401) {
+                    await signOut();
+                }
                 processQueue(refreshError as AxiosError, null);
                 await AsyncStorage.removeItem('auth_tokens');
-                throw refreshError;
             } finally {
                 isRefreshing = false;
             }
