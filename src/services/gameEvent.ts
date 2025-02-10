@@ -161,6 +161,26 @@ class GameEventService {
         }
     }
 
+    async startBroadcast(
+        broadcastId: string,
+        organizationId: string
+    ): Promise<BroadcastInfo> {
+        try {
+            const response = await axiosInstance.post<BroadcastInfo>(
+                `/api/livestreams/${broadcastId}/start`,
+                {},
+                {
+                    headers: {
+                        'Club-ID': organizationId
+                    }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     private handleError(error: any): Error {
         if (error.response) {
             return new Error(error.response.data?.message || 'Operation failed');

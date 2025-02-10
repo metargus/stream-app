@@ -53,6 +53,9 @@ export const GameEventDetailsScreen: React.FC = () => {
     const { id, organizationId, type } = route.params;
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+    const [stopPollingInterval, setStopPollingInterval] = useState<NodeJS.Timeout | null>(null);
+
 
     useEffect(() => {
         fetchEventDetails();
@@ -240,6 +243,54 @@ export const GameEventDetailsScreen: React.FC = () => {
 
     const isFinished = state.event?.broadcast?.state === "finished";
 
+    const isCreating = state.event?.broadcast?.state === 'creating';
+
+    const isDeleting = state.event?.broadcast?.state === 'deleting';
+
+
+    useEffect(() => {
+        if (isCreating) {
+            const interval = setInterval(() => {
+                fetchEventDetails();
+            }, 60000); 
+            setPollingInterval(interval);
+        } else {
+            // Clear polling if not creating
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                setPollingInterval(null);
+            }
+        }
+
+        return () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        };
+    }, [state.event?.broadcast?.state]);
+
+    useEffect(() => {
+        if (isDeleting) {
+            const interval = setInterval(() => {
+                fetchEventDetails();
+            }, 30000);
+            setStopPollingInterval(interval);
+        } else {
+            // Clear polling if not creating
+            if (stopPollingInterval) {
+                clearInterval(stopPollingInterval);
+                setStopPollingInterval(null);
+            }
+        }
+
+        return () => {
+            if (stopPollingInterval) {
+                clearInterval(stopPollingInterval);
+            }
+        };
+    }, [state.event?.broadcast?.state]);
+
+
     const renderTabs = () => (
         <View style={styles.tabsContainer}>
             <View style={styles.tabsRow}>
@@ -349,7 +400,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                             <TouchableOpacity
                             style={styles.startLiveButton}
                             onPress={handleStartLive}
-                            disabled={isLoading}
+                            disabled={isLoading || isFinished || isCreating || isDeleting}
                         >
                             <Icon name="radio" size={16} color='#FF3B30' style={{ marginRight: 8 }} />
                             <Text style={styles.startLiveText}>Start Live</Text>
@@ -358,18 +409,24 @@ export const GameEventDetailsScreen: React.FC = () => {
                         <>
                             {state?.event?.broadcast?.state === 'paused' ? (
                                 <TouchableOpacity
-                                    style={styles.controlButton}
+                                    style={[
+                                        styles.controlButton,
+                                        (isLoading || isFinished || isCreating || isDeleting) && styles.disabledButton
+                                    ]}
                                     onPress={handleResumeBroadcast}
-                                    disabled={isLoading}
+                                    disabled={isLoading || isFinished || isCreating || isDeleting}
                                 >
                                     <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
                                     <Text style={styles.controlButtonText}>Resume</Text>
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity
-                                    style={styles.controlButton}
+                                    style={[
+                                        styles.controlButton,
+                                        (isLoading || isFinished || isCreating || isDeleting) && styles.disabledButton
+                                    ]}
                                     onPress={handlePauseBroadcast}
-                                    disabled={isLoading}
+                                    disabled={isLoading || isFinished || isCreating || isDeleting}
                                 >
                                     <Icon name="pause" size={16} color={colors.white} style={{ marginRight: 8 }} />
                                     <Text style={styles.controlButtonText}>Pause</Text>
@@ -377,9 +434,12 @@ export const GameEventDetailsScreen: React.FC = () => {
                             )}
 
                             <TouchableOpacity
-                                style={styles.controlButton}
+                                style={[
+                                    styles.controlButton,
+                                    (isLoading || isFinished || isCreating || isDeleting) && styles.disabledButton
+                                ]}
                                 onPress={handleStopBroadcast}
-                                disabled={isLoading}
+                                disabled={isLoading || isFinished || isCreating || isDeleting}
                             >
                                 <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
                                 <Text style={styles.controlButtonText}>Stop</Text>
@@ -388,7 +448,20 @@ export const GameEventDetailsScreen: React.FC = () => {
                     )}
                 </View>
             )}
-            
+            {isCreating && (
+                <View style={styles.creatingStateContainer}>
+                    <Text style={styles.creatingStateText}>The stream is starting</Text>
+                    <ActivityIndicator size="small" color={colors.controlButton} style={styles.creatingStateLoader} />
+                </View>
+            )}
+
+            {isDeleting && (
+                <View style={styles.creatingStateContainer}>
+                    <Text style={styles.creatingStateText}>The stream is stopping</Text>
+                    <ActivityIndicator size="small" color={colors.controlButton} style={styles.creatingStateLoader} />
+                </View>
+            )}
+
 
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Starts at</Text>
@@ -426,42 +499,42 @@ export const GameEventDetailsScreen: React.FC = () => {
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Home Team</Text>
                 <TextInput
-                    style={[styles.textInput, isFinished && styles.disabledInput]}
+                    style={[styles.textInput, (isLoading || isFinished || isCreating || isDeleting) && styles.disabledInput]}
                     value={state.homeTeamName}
                     onChangeText={(text) => setState(prev => ({
                         ...prev,
                         homeTeamName: text
                     }))}
                     onBlur={handleHomeTeamNameBlur}
-                    editable={!isFinished}
+                    editable={!isLoading && !isFinished && !isCreating && !isDeleting}
                 />
             </View>
 
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Away Team</Text>
                 <TextInput
-                    style={[styles.textInput, isFinished && styles.disabledInput]}
+                    style={[styles.textInput, (isLoading || isFinished || isCreating || isDeleting) && styles.disabledInput]}
                     value={state.awayTeamName}
                     onChangeText={(text) => setState(prev => ({
                         ...prev,
                         awayTeamName: text
                     }))}
                     onBlur={handleAwayTeamNameBlur}
-                    editable={!isFinished}
+                    editable={!isLoading && !isFinished && !isCreating && !isDeleting}
                 />
             </View>
 
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Competition Name</Text>
                 <TextInput
-                    style={[styles.textInput, isFinished && styles.disabledInput]}
+                    style={[styles.textInput, (isLoading || isFinished || isCreating || isDeleting) && styles.disabledInput]}
                     value={state.competitionName}
                     onChangeText={(text) => setState(prev => ({
                         ...prev,
                         competitionName: text
                     }))}
                     onBlur={handleCompetitionNameBlur}
-                    editable={!isFinished}
+                    editable={!isLoading && !isFinished && !isCreating && !isDeleting}
                 />
             </View>
         </View>
@@ -491,7 +564,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Switch
                     value={state.isCommentaryOn}
                     onValueChange={handleChangeCommentary}
-                    disabled={isFinished}
+                    disabled={isLoading || isFinished || isCreating || isDeleting}
                 />
             </View>
 
@@ -808,5 +881,20 @@ const styles = StyleSheet.create({
         color: '#FF3B30',
         fontSize: 16,
         fontWeight: '600',
-    }
+    },
+    creatingStateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 20,
+        gap: 8,
+    },
+    creatingStateText: {
+        textAlign: 'center',
+        fontSize: 14,
+        color: colors.text,
+    },
+    creatingStateLoader: {
+        marginLeft: 8,
+    },
 })
