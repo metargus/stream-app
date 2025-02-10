@@ -219,6 +219,8 @@ export const GameEventDetailsScreen: React.FC = () => {
         await gameEvent.switchToCommercialMedia(mediaId, state.event?.broadcast?.id, organizationId)
     };
 
+    const isFinished = state.event?.broadcast?.state === "finished";
+
     const renderTabs = () => (
         <View style={styles.tabsContainer}>
             <View style={styles.tabsRow}>
@@ -322,36 +324,48 @@ export const GameEventDetailsScreen: React.FC = () => {
 
     const renderEventTab = () => (
         <View style={styles.tabContent}>
-            <View style={styles.controlButtons}>
-                {state?.event?.broadcast?.state === 'paused' ? <TouchableOpacity
-                    style={styles.controlButton}
-                    onPress={handleResumeBroadcast}
-                >
-                    <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
-                    <Text style={styles.controlButtonText}>Resume</Text>
-                </TouchableOpacity> : <TouchableOpacity
-                    style={styles.controlButton}
-                    onPress={handlePauseBroadcast}
-                >
-                    <Icon name="pause" size={16} color={colors.white} style={{ marginRight: 8 }} />
-                    <Text style={styles.controlButtonText}>Pause</Text>
-                </TouchableOpacity>}
-                
+            {!isFinished && 
+                <View style={styles.controlButtons}>
+                {/* Control buttons should be hidden when finished */}
+                {!isFinished && (
+                    <>
+                        {state?.event?.broadcast?.state === 'paused' ? (
+                            <TouchableOpacity
+                                style={[styles.controlButton, isFinished && styles.disabledButton]}
+                                onPress={handleResumeBroadcast}
+                                disabled={isFinished}
+                            >
+                                <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                                <Text style={styles.controlButtonText}>Resume</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                style={[styles.controlButton, isFinished && styles.disabledButton]}
+                                onPress={handlePauseBroadcast}
+                                disabled={isFinished}
+                            >
+                                <Icon name="pause" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                                <Text style={styles.controlButtonText}>Pause</Text>
+                            </TouchableOpacity>
+                        )}
 
-                <TouchableOpacity
-                    style={styles.controlButton}
-                    onPress={handleStopBroadcast}
-                    disabled={isLoading}
-                >
-                    <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
-                    <Text style={styles.controlButtonText}>Stop</Text>
-                </TouchableOpacity>
-            </View>
+                        <TouchableOpacity
+                            style={[styles.controlButton, isFinished && styles.disabledButton]}
+                            onPress={handleStopBroadcast}
+                            disabled={isFinished || isLoading}
+                        >
+                            <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                            <Text style={styles.controlButtonText}>Stop</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
+            </View>}
+            
 
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Starts at</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, isFinished && styles.disabledInput]}
                     value={formatDateTime(state.startsAt)}
                     editable={false}
                 />
@@ -360,7 +374,7 @@ export const GameEventDetailsScreen: React.FC = () => {
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Ends at</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, isFinished && styles.disabledInput]}
                     value={formatDateTime(state.endsAt)}
                     editable={false}
                 />
@@ -370,7 +384,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Text style={styles.label}>Stream Key</Text>
                 <View style={styles.streamKeyContainer}>
                     <Text
-                        style={[styles.input, { flex: 1 }]}
+                        style={[styles.input, { flex: 1 }, isFinished && styles.disabledInput]}
                     >
                         {state.streamKey}
                     </Text>
@@ -384,43 +398,47 @@ export const GameEventDetailsScreen: React.FC = () => {
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Home Team</Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={[styles.textInput, isFinished && styles.disabledInput]}
                     value={state.homeTeamName}
                     onChangeText={(text) => setState(prev => ({
                         ...prev,
                         homeTeamName: text
                     }))}
                     onBlur={handleHomeTeamNameBlur}
+                    editable={!isFinished}
                 />
             </View>
 
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Away Team</Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={[styles.textInput, isFinished && styles.disabledInput]}
                     value={state.awayTeamName}
                     onChangeText={(text) => setState(prev => ({
                         ...prev,
                         awayTeamName: text
                     }))}
                     onBlur={handleAwayTeamNameBlur}
+                    editable={!isFinished}
                 />
             </View>
 
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Competition Name</Text>
                 <TextInput
-                    style={styles.textInput}
+                    style={[styles.textInput, isFinished && styles.disabledInput]}
                     value={state.competitionName}
                     onChangeText={(text) => setState(prev => ({
                         ...prev,
                         competitionName: text
                     }))}
                     onBlur={handleCompetitionNameBlur}
+                    editable={!isFinished}
                 />
             </View>
         </View>
     );
+
 
     const renderCameraAndAudioTab = () => (
         <View style={styles.tabContent}>
@@ -445,6 +463,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Switch
                     value={state.isCommentaryOn}
                     onValueChange={handleChangeCommentary}
+                    disabled={isFinished}
                 />
             </View>
 
@@ -740,5 +759,12 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontSize: 16,
         fontWeight: '600',
-    }
+    },
+    disabledButton: {
+        opacity: 0.5,
+    },
+    disabledInput: {
+        opacity: 0.7,
+        backgroundColor: colors.background,
+    },
 })

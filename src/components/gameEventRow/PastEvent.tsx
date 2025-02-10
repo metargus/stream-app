@@ -15,6 +15,10 @@ export const PastEvent: React.FC<Props> = ({ event, onPress }) => {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
+
+    const isRecording = event.broadcast?.streamerSaveUrl || false
+    const isStream = event.broadcast?.youtubeStreamKey || event.broadcast?.youtubeStreamKey2 || false
+    
     return (
         <TouchableOpacity style={styles.container} onPress={() => onPress(event)}>
             <View style={styles.content}>
@@ -45,12 +49,17 @@ export const PastEvent: React.FC<Props> = ({ event, onPress }) => {
                                 {capitalizeFirstLetter(event.broadcast?.type)}
                             </Text>
                         </View>
-                        <View style={styles.pillBadge}>
-                            <Text style={styles.pillText}>stream</Text>
-                        </View>
-                        <View style={styles.pillBadge}>
-                            <Text style={styles.pillText}>record</Text>
-                        </View>
+                        {isStream &&
+                            <View style={styles.pillBadge}>
+                                <Text style={styles.pillText}>stream</Text>
+                            </View>
+                        }
+
+                        {isRecording &&
+                            <View style={styles.pillBadge}>
+                                <Text style={styles.pillText}>record</Text>
+                            </View>
+                        }
                     </View>
                 </View>
             </View>

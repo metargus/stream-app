@@ -14,6 +14,9 @@ export const UpcomingEvent: React.FC<Props> = ({ event, onPress }) => {
     const [countdown, setCountdown] = useState('');
     
     console.log(event)
+    
+    const isRecording = event.broadcast?.streamerSaveUrl || false
+    const isStream = event.broadcast?.youtubeStreamKey || event.broadcast?.youtubeStreamKey2 || false
 
     const capitalizeFirstLetter = (string: string | undefined): string => {
         if (!string) return '';
@@ -83,12 +86,18 @@ export const UpcomingEvent: React.FC<Props> = ({ event, onPress }) => {
                                 {capitalizeFirstLetter(event.broadcast?.type)}
                             </Text>
                         </View>
-                        <View style={styles.pillBadge}>
-                            <Text style={styles.pillText}>stream</Text>
-                        </View>
-                        <View style={styles.pillBadge}>
-                            <Text style={styles.pillText}>record</Text>
-                        </View>
+                        {isStream && 
+                            <View style={styles.pillBadge}>
+                                <Text style={styles.pillText}>stream</Text>
+                            </View>
+                        }
+
+                        {isRecording &&
+                            <View style={styles.pillBadge}>
+                                <Text style={styles.pillText}>record</Text>
+                            </View>
+                        }
+                       
                     </View>
 
                     <View style={styles.rightFooter}>
