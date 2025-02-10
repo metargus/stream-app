@@ -1,9 +1,9 @@
 //src/components/GameEventRow/UpcomingEvent.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { GameEvent } from '../../types/event';
-import { colors } from '../../theme/colors';
-import { format } from 'date-fns';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {GameEvent} from '../../types/event';
+import {colors} from '../../theme/colors';
+import {format} from 'date-fns';
 
 interface Props {
     event: GameEvent;
@@ -12,6 +12,13 @@ interface Props {
 
 export const UpcomingEvent: React.FC<Props> = ({ event, onPress }) => {
     const [countdown, setCountdown] = useState('');
+    
+    console.log(event)
+
+    const capitalizeFirstLetter = (string: string | undefined): string => {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
 
     useEffect(() => {
         const updateCountdown = () => {
@@ -61,26 +68,32 @@ export const UpcomingEvent: React.FC<Props> = ({ event, onPress }) => {
                         {format(new Date(event.startDateTime), 'MM/dd/yyyy')}
                     </Text>
                     <Text style={styles.time}>
-                        {format(new Date(event.startDateTime), 'HH:mm')}-
+                        {format(new Date(event.startDateTime), 'HH:mm')} - {''}
                         {format(new Date(event.endDateTime), 'HH:mm')}
                     </Text>
                 </View>
 
-                <Text style={styles.countdown}>
-                    <Text style={styles.countdownLabel}>Starts in </Text>
-                    <Text style={styles.countdownValue}>{countdown}</Text>
-                </Text>
+
 
                 <View style={styles.footer}>
-                    <View style={styles.tag}>
-                        <View style={[styles.dot, { backgroundColor: 'green' }]} />
-                        <Text style={styles.tagText}>lorem ipsum</Text>
+                    <View style={styles.leftFooter}>
+                        <View style={styles.badge}>
+                            <View style={[styles.dot, { backgroundColor: '#8BC34A' }]} />
+                            <Text style={styles.badgeText}>
+                                {capitalizeFirstLetter(event.broadcast?.type)}
+                            </Text>
+                        </View>
+                        <View style={styles.pillBadge}>
+                            <Text style={styles.pillText}>stream</Text>
+                        </View>
+                        <View style={styles.pillBadge}>
+                            <Text style={styles.pillText}>record</Text>
+                        </View>
                     </View>
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>lorem</Text>
-                    </View>
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>ipsum</Text>
+
+                    <View style={styles.rightFooter}>
+                        <Text style={styles.startAtLabel}>Start at:</Text>
+                        <Text style={styles.startAtTime}>{countdown}</Text>
                     </View>
                 </View>
             </View>
@@ -118,7 +131,6 @@ const styles = StyleSheet.create({
     },
     countdown: {
         fontSize: 12,
-        marginBottom: 8,
     },
     countdownLabel: {
         color: colors.text,
@@ -129,10 +141,12 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: 8,
+        marginTop: 12,
     },
     tag: {
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
@@ -147,6 +161,11 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     badge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    startsAt: {
         backgroundColor: colors.background,
         paddingHorizontal: 8,
         paddingVertical: 2,
@@ -154,6 +173,36 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         fontSize: 12,
+        fontWeight: '500',
+    },
+    leftFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    rightFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    pillBadge: {
+        backgroundColor: '#F5F5F5',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 12,
+    },
+    pillText: {
+        fontSize: 12,
+        color: colors.textSecondary,
+    },
+    startAtLabel: {
+        fontSize: 12,
+        color: colors.text,
+        fontWeight: '500',
+    },
+    startAtTime: {
+        fontSize: 12,
+        color: '#FF7043',
         fontWeight: '500',
     },
 });

@@ -11,6 +11,10 @@ interface Props {
 }
 
 export const PastEvent: React.FC<Props> = ({ event, onPress }) => {
+    const capitalizeFirstLetter = (string: string | undefined): string => {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
     return (
         <TouchableOpacity style={styles.container} onPress={() => onPress(event)}>
             <View style={styles.content}>
@@ -34,15 +38,19 @@ export const PastEvent: React.FC<Props> = ({ event, onPress }) => {
                 </View>
 
                 <View style={styles.footer}>
-                    <View style={styles.tag}>
-                        <View style={[styles.dot, { backgroundColor: 'green' }]} />
-                        <Text style={styles.tagText}>lorem ipsum</Text>
-                    </View>
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>lorem</Text>
-                    </View>
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>ipsum</Text>
+                    <View style={styles.leftFooter}>
+                        <View style={styles.badge}>
+                            <View style={[styles.dot, { backgroundColor: '#8BC34A' }]} />
+                            <Text style={styles.badgeText}>
+                                {capitalizeFirstLetter(event.broadcast?.type)}
+                            </Text>
+                        </View>
+                        <View style={styles.pillBadge}>
+                            <Text style={styles.pillText}>stream</Text>
+                        </View>
+                        <View style={styles.pillBadge}>
+                            <Text style={styles.pillText}>record</Text>
+                        </View>
                     </View>
                 </View>
             </View>
@@ -91,8 +99,9 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: 8,
+        marginTop: 12,
     },
     tag: {
         flexDirection: 'row',
@@ -109,13 +118,27 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     badge: {
-        backgroundColor: colors.background,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
     },
     badgeText: {
         fontSize: 12,
         fontWeight: '500',
+    },
+    leftFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    pillBadge: {
+        backgroundColor: '#F5F5F5',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 12,
+    },
+    pillText: {
+        fontSize: 12,
+        color: colors.textSecondary,
     },
 });

@@ -73,8 +73,8 @@ axiosInstance.interceptors.response.use(
                 const response = await axios.get(`${API_URL}/api/auth/refresh-token`, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Mismatch-App': 'livestream-remote', 
-                        Authorization: `Bearer ${refreshToken}` 
+                        'X-Mismatch-App': 'livestream-remote',
+                        Cookie: `refreshToken=${refreshToken}`,
                     }
                 });
                 
