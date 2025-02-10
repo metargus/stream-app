@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import authService from '../../services/auth';
 import { styles } from './styles';
 import { colors } from '../../theme/colors';
-import {useAuth} from "../../contexts/AuthContext.tsx";
+import { useAuth } from "../../contexts/AuthContext.tsx";
 
 interface InputProps extends TextInputProps {
     label: string;
