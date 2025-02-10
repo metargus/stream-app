@@ -66,7 +66,11 @@ axiosInstance.interceptors.response.use(
 
                 const { refreshToken } = JSON.parse(tokens);
                 const response = await axios.get(`${API_URL}/api/auth/refresh-token`, {
-                    headers: { Authorization: `Bearer ${refreshToken}` }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Mismatch-App': 'livestream-remote', 
+                        Authorization: `Bearer ${refreshToken}` 
+                    }
                 });
 
                 const { accessToken } = response.data;

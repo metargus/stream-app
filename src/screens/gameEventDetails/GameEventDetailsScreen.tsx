@@ -203,6 +203,17 @@ export const GameEventDetailsScreen: React.FC = () => {
         }));
     };
 
+    const formatDateTime = (date: Date): string => {
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    };
+
 
     const handleSwitchToMedia = async (mediaId: string) => {
         if (!state.event?.broadcast?.id) return;
@@ -342,7 +353,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Text style={styles.label}>Starts at</Text>
                 <TextInput
                     style={styles.input}
-                    value={state.startsAt.toLocaleString()}
+                    value={formatDateTime(state.startsAt)}
                     editable={false}
                 />
             </View>
@@ -351,7 +362,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Text style={styles.label}>Ends at</Text>
                 <TextInput
                     style={styles.input}
-                    value={state.endsAt.toLocaleString()}
+                    value={formatDateTime(state.endsAt)}
                     editable={false}
                 />
             </View>
