@@ -38,6 +38,8 @@ export interface EventKind {
 
 export interface BroadcastInfo {
     id: string;
+    autoStart?: boolean;
+    autoStop?: boolean;
     title?: string;
     streamerInputUrl?: string;
     youtubeStreamKey?: string;

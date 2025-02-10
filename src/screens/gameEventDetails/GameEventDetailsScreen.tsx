@@ -155,7 +155,24 @@ export const GameEventDetailsScreen: React.FC = () => {
         }
     };
 
-    // Handle event updates
+    const handleStartLive = async () => {
+        try {
+            if (!state.event?.broadcast?.id) return;
+            setIsLoading(true);
+            await gameEvent.startBroadcast(
+                state.event.broadcast.id,
+                organizationId
+            );
+            await fetchEventDetails();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to start broadcast');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+
+        // Handle event updates
     const handleUpdateEvent = async (updateData: Partial<EventUpdateRequest>) => {
         try {
             if (!state.event) return;
@@ -218,6 +235,8 @@ export const GameEventDetailsScreen: React.FC = () => {
         if (!state.event?.broadcast?.id) return;
         await gameEvent.switchToCommercialMedia(mediaId, state.event?.broadcast?.id, organizationId)
     };
+    
+    console.log(state.event);
 
     const isFinished = state.event?.broadcast?.state === "finished";
 
@@ -324,42 +343,51 @@ export const GameEventDetailsScreen: React.FC = () => {
 
     const renderEventTab = () => (
         <View style={styles.tabContent}>
-            {!isFinished && 
+            {!isFinished && (
                 <View style={styles.controlButtons}>
-                {/* Control buttons should be hidden when finished */}
-                {!isFinished && (
-                    <>
-                        {state?.event?.broadcast?.state === 'paused' ? (
+                    {state?.event?.broadcast?.state === 'scheduled' ? (
                             <TouchableOpacity
-                                style={[styles.controlButton, isFinished && styles.disabledButton]}
-                                onPress={handleResumeBroadcast}
-                                disabled={isFinished}
-                            >
-                                <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
-                                <Text style={styles.controlButtonText}>Resume</Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity
-                                style={[styles.controlButton, isFinished && styles.disabledButton]}
-                                onPress={handlePauseBroadcast}
-                                disabled={isFinished}
-                            >
-                                <Icon name="pause" size={16} color={colors.white} style={{ marginRight: 8 }} />
-                                <Text style={styles.controlButtonText}>Pause</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        <TouchableOpacity
-                            style={[styles.controlButton, isFinished && styles.disabledButton]}
-                            onPress={handleStopBroadcast}
-                            disabled={isFinished || isLoading}
+                            style={styles.startLiveButton}
+                            onPress={handleStartLive}
+                            disabled={isLoading}
                         >
-                            <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
-                            <Text style={styles.controlButtonText}>Stop</Text>
+                            <Icon name="radio" size={16} color='#FF3B30' style={{ marginRight: 8 }} />
+                            <Text style={styles.startLiveText}>Start Live</Text>
                         </TouchableOpacity>
-                    </>
-                )}
-            </View>}
+                    ) : (
+                        <>
+                            {state?.event?.broadcast?.state === 'paused' ? (
+                                <TouchableOpacity
+                                    style={styles.controlButton}
+                                    onPress={handleResumeBroadcast}
+                                    disabled={isLoading}
+                                >
+                                    <Icon name="play" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                                    <Text style={styles.controlButtonText}>Resume</Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity
+                                    style={styles.controlButton}
+                                    onPress={handlePauseBroadcast}
+                                    disabled={isLoading}
+                                >
+                                    <Icon name="pause" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                                    <Text style={styles.controlButtonText}>Pause</Text>
+                                </TouchableOpacity>
+                            )}
+
+                            <TouchableOpacity
+                                style={styles.controlButton}
+                                onPress={handleStopBroadcast}
+                                disabled={isLoading}
+                            >
+                                <Icon name="square" size={16} color={colors.white} style={{ marginRight: 8 }} />
+                                <Text style={styles.controlButtonText}>Stop</Text>
+                            </TouchableOpacity>
+                        </>
+                    )}
+                </View>
+            )}
             
 
             <View style={styles.inputGroup}>
@@ -767,4 +795,18 @@ const styles = StyleSheet.create({
         opacity: 0.7,
         backgroundColor: colors.background,
     },
+    startLiveButton: {
+        flex: 1,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+    },
+    startLiveText: {
+        color: '#FF3B30',
+        fontSize: 16,
+        fontWeight: '600',
+    }
 })
