@@ -63,7 +63,6 @@ axiosInstance.interceptors.response.use(
             try {
                 const tokens = await AsyncStorage.getItem('auth_tokens');
                 
-                console.log("Stored tokens: ", tokens);
                 if (!tokens) return new Error('No refresh token available');
 
                 const { refreshToken } = JSON.parse(tokens);
@@ -78,8 +77,6 @@ axiosInstance.interceptors.response.use(
                     }
                 });
                 
-                console.log('New token: ', response?.data?.accessToken);
-
                 const { accessToken } = response.data;
                 const storedTokens = JSON.parse(tokens);
                 await AsyncStorage.setItem('auth_tokens', JSON.stringify({

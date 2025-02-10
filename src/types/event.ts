@@ -28,6 +28,12 @@ export interface WorkStatus {
     hasError: boolean;
 }
 
+export interface Recording {
+    link?: string | null;
+    expiresAt?: string | null;
+    preparing?: boolean | null;
+}
+
 // src/types/event.ts
 export interface EventKind {
     id: string;
@@ -64,6 +70,7 @@ export interface Court {
 
 export interface GameEvent {
     id: string;
+    hasRecording: boolean;
     type: EventKind;
     title?: string;
     place?: string;
@@ -86,6 +93,7 @@ export interface GameEvent {
 
 export interface GameEventDetailsState {
     id: string;
+    recording: Recording | null,
     type: string;
     title?: string;
     organization: string;

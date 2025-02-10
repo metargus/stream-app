@@ -2,7 +2,8 @@
 import axiosInstance from './api/axiosInstance';
 import { GameEvent } from '../types/event';
 import { EventUpdateRequest } from '../types/eventUpdate';
-import { BroadcastInfo } from '../types/event.ts';
+import { BroadcastInfo, Recording } from '../types/event.ts';
+import axios from "axios";
 
 class GameEventService {
     private static instance: GameEventService;
@@ -179,6 +180,27 @@ class GameEventService {
         } catch (error) {
             throw this.handleError(error);
         }
+    }
+
+    async getEventRecording(
+        eventId: string,
+        organizationId: string
+    ): Promise<Recording> {
+        try {
+            const response = await axiosInstance.get<Recording>(
+                `/api/events/${eventId}/recording`,
+                {
+                    headers: {
+                        'Club-ID': organizationId
+                    }
+                }
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error?.response?.status === 404) {
+                return {link: null, preparing: null, expiresAt: null};
+            }
+            throw this.handleError(error);        }
     }
 
     private handleError(error: any): Error {

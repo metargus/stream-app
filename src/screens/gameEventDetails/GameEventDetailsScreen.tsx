@@ -8,8 +8,10 @@ import {
     TextInput,
     Switch,
     StyleSheet,
-    ActivityIndicator, SafeAreaView,
+    ActivityIndicator, SafeAreaView, Alert, Linking,
 } from 'react-native';
+import RNFetchBlob from 'rn-fetch-blob';
+import { Platform, PermissionsAndroid } from 'react-native';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { colors } from '../../theme/colors';
@@ -27,6 +29,7 @@ export const GameEventDetailsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('event');
     const [state, setState] = useState<GameEventDetailsState>({
         id: '',
+        recording: null,
         type: '',
         title: '',
         organization: '',
@@ -61,16 +64,92 @@ export const GameEventDetailsScreen: React.FC = () => {
         fetchEventDetails();
     }, []);
 
+    const checkPermission = async () => {
+        if (Platform.OS === 'ios') {
+            return true;
+        }
+
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+                {
+                    title: 'Storage Permission Required',
+                    message: 'App needs access to your storage to download the recording',
+                    buttonPositive: 'OK',
+                    buttonNegative: 'Cancel',
+                    buttonNeutral: 'Ask Me Later',
+                }
+            );
+
+
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                return true;
+            } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+                Alert.alert(
+                    "Permission Denied",
+                    "Storage permission is permanently denied. Please enable it from settings.",
+                    [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                            text: "Open Settings",
+                            onPress: () => Linking.openSettings(),
+                        }
+                    ]
+                );
+                return false;
+            } else {
+                return false;
+            }
+        } catch (err) {
+            return false;
+        }
+    };
+
+    const downloadRecording = async (url: string) => {
+        if (!(await checkPermission())) {
+            return;
+        }
+
+        const { config, fs } = RNFetchBlob;
+        const date = new Date();
+        const fileName = `recording_${date.getTime()}.mp4`;
+        const downloadsPath = Platform.OS === 'ios' ? fs.dirs.DocumentDir : fs.dirs.DownloadDir;
+        const filePath = `${downloadsPath}/${fileName}`;
+
+        try {
+            const response = await config({
+                fileCache: true,
+                addAndroidDownloads: {
+                    useDownloadManager: true,
+                    notification: true,
+                    path: filePath,
+                    description: 'Downloading recording...',
+                    mime: 'video/mp4',
+                    mediaScannable: true,
+                }
+            }).fetch('GET', url);
+
+            if (Platform.OS === 'ios') {
+                RNFetchBlob.ios.previewDocument(response.path());
+            }
+        } catch (error) {
+            console.error('Download failed:', error);
+        }
+    };
+
     const fetchEventDetails = async () => {
         try {
             setIsLoading(true);
             const event = await gameEvent.getGameEvent(id, type, organizationId);
+            const recording = event.hasRecording? await gameEvent.getEventRecording(id, organizationId) : null;
+            
             const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
             const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam) || {name: ''};
             
             setState(prev => ({
                 ...prev,
                 event,
+                recording: recording,
                 title: event.title,
                 startsAt: new Date(event.startDateTime),
                 endsAt: new Date(event.endDateTime),
@@ -181,7 +260,6 @@ export const GameEventDetailsScreen: React.FC = () => {
             if (!state.event) return;
             setIsLoading(true);
             const request = createEventUpdateRequest(state.event);
-            console.log(type)
             const updatedEvent = await gameEvent.updateGameEvent(
                 id,
                 type,
@@ -239,8 +317,6 @@ export const GameEventDetailsScreen: React.FC = () => {
         await gameEvent.switchToCommercialMedia(mediaId, state.event?.broadcast?.id, organizationId)
     };
     
-    console.log(state.event);
-
     const isFinished = state.event?.broadcast?.state === "finished";
 
     const isCreating = state.event?.broadcast?.state === 'creating';
@@ -491,6 +567,20 @@ export const GameEventDetailsScreen: React.FC = () => {
                     </Text>
                 </View>
             </View>
+
+            {state.recording && !state.recording?.preparing && (
+                <View style={styles.downloadContainer}>
+                    <TouchableOpacity
+                        style={styles.downloadButton}
+                        onPress={() => { 
+                            state.recording?.link && downloadRecording(state.recording?.link)}
+                        }
+                    >
+                        <Icon name="download" size={16} color={colors.primary} style={{ marginRight: 8 }} />
+                        <Text style={styles.downloadButtonText}>Download Recording</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
     );
 
@@ -897,4 +987,23 @@ const styles = StyleSheet.create({
     creatingStateLoader: {
         marginLeft: 8,
     },
+    downloadContainer: {
+        marginBottom: 16,
+        paddingVertical: 8,
+    },
+    downloadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        backgroundColor: colors.background,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.primary,
+    },
+    downloadButtonText: {
+        color: colors.primary,
+        fontSize: 16,
+        fontWeight: '500',
+    }
 })
