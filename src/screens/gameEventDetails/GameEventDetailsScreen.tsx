@@ -65,7 +65,6 @@ export const GameEventDetailsScreen: React.FC = () => {
             const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
             const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam) || {name: ''};
             
-            console.log(event.competitionName);
             setState(prev => ({
                 ...prev,
                 event,
@@ -370,14 +369,11 @@ export const GameEventDetailsScreen: React.FC = () => {
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Stream Key</Text>
                 <View style={styles.streamKeyContainer}>
-                    <TextInput
+                    <Text
                         style={[styles.input, { flex: 1 }]}
-                        value={state.streamKey}
-                        onChangeText={(text) => setState(prev => ({ ...prev, streamKey: text }))}
-                    />
-                    <TouchableOpacity>
-                        <Icon name="copy" size={20} color={colors.textSecondary} style={styles.copyIcon} />
-                    </TouchableOpacity>
+                    >
+                        {state.streamKey}
+                    </Text>
                 </View>
             </View>
         </View>
@@ -428,24 +424,24 @@ export const GameEventDetailsScreen: React.FC = () => {
 
     const renderCameraAndAudioTab = () => (
         <View style={styles.tabContent}>
-            <View style={styles.toggleContainer}>
-                <Text style={styles.toggleLabel}>Picture in Picture</Text>
-                <Switch
-                    value={state.pictureInPicture}
-                    onValueChange={handlePictureInPictureChange}
-                />
-            </View>
+            {/*<View style={styles.toggleContainer}>*/}
+            {/*    <Text style={styles.toggleLabel}>Picture in Picture</Text>*/}
+            {/*    <Switch*/}
+            {/*        value={state.pictureInPicture}*/}
+            {/*        onValueChange={handlePictureInPictureChange}*/}
+            {/*    />*/}
+            {/*</View>*/}
+            
+            {/*<View style={styles.toggleContainer}>*/}
+            {/*    <Text style={styles.toggleLabel}>Pan & Zoom</Text>*/}
+            {/*    <Switch*/}
+            {/*        value={false}*/}
+            {/*        onValueChange={() => {}}*/}
+            {/*    />*/}
+            {/*</View>*/}
 
             <View style={styles.toggleContainer}>
-                <Text style={styles.toggleLabel}>Pan & Zoom</Text>
-                <Switch
-                    value={false}
-                    onValueChange={() => {}}
-                />
-            </View>
-
-            <View style={styles.toggleContainer}>
-                <Text style={styles.toggleLabel}>Audio Input</Text>
+                <Text style={styles.toggleLabel}>Commentary</Text>
                 <Switch
                     value={state.isCommentaryOn}
                     onValueChange={handleChangeCommentary}

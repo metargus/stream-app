@@ -44,9 +44,8 @@ class EventService {
                     }
                 });
             });
-            console.log(response)
-            return response.data.sort((a, b) =>
-                new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime()
+            return response?.data?.sort((a, b) =>
+                new Date(b?.startDateTime).getTime() - new Date(a?.startDateTime).getTime()
             );
         } catch (error) {
             throw this.handleError(error);

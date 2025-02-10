@@ -85,6 +85,17 @@ export const EventsScreen = () => {
         });
     };
 
+    const renderSectionHeader = ({ section: { title, data } }) => (
+        <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{title}</Text>
+            {data.length === 0 && (
+                <Text style={styles.emptyMessage}>
+                    No {title.toLowerCase()} events
+                </Text>
+            )}
+        </View>
+    );
+
     if (isLoading && !isRefreshing) {
         return (
             <View style={styles.loadingContainer}>
@@ -102,11 +113,7 @@ export const EventsScreen = () => {
                 renderItem={({ item }) => (
                     <EventRow event={item} onPress={handleEventPress} />
                 )}
-                renderSectionHeader={({ section: { title } }) => (
-                    <View style={styles.sectionHeader}>
-                        <Text style={styles.sectionTitle}>{title}</Text>
-                    </View>
-                )}
+                renderSectionHeader={renderSectionHeader}
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefreshing}
@@ -141,5 +148,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: colors.textSecondary,
+    },
+    emptyMessage: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        fontStyle: 'italic',
+        marginTop: 4,
     },
 });

@@ -1,6 +1,5 @@
 // src/services/api/axios-instance.ts
 import axios, { AxiosError, AxiosInstance } from 'axios';
-import { useAuth } from '../../contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_URL = 'https://api-dev.mismatch.gr'; // Replace with your actual API URL
@@ -45,7 +44,6 @@ axiosInstance.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
-        const { signOut } = useAuth();
 
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {
@@ -64,11 +62,14 @@ axiosInstance.interceptors.response.use(
 
             try {
                 const tokens = await AsyncStorage.getItem('auth_tokens');
+                
+                console.log("Stored tokens: ", tokens);
                 if (!tokens) return new Error('No refresh token available');
 
                 const { refreshToken } = JSON.parse(tokens);
                 
-                if (!refreshToken) await signOut();
+                if (!refreshToken) return new Error('No refresh token available');
+
                 const response = await axios.get(`${API_URL}/api/auth/refresh-token`, {
                     headers: {
                         'Content-Type': 'application/json',
@@ -76,6 +77,8 @@ axiosInstance.interceptors.response.use(
                         Authorization: `Bearer ${refreshToken}` 
                     }
                 });
+                
+                console.log('New token: ', response?.data?.accessToken);
 
                 const { accessToken } = response.data;
                 const storedTokens = JSON.parse(tokens);
@@ -90,7 +93,7 @@ axiosInstance.interceptors.response.use(
             } catch (refreshError) {
 
                 if (axios.isAxiosError(refreshError) && refreshError.response?.status === 401) {
-                    await signOut();
+                     return new Error('No refresh token available');
                 }
                 processQueue(refreshError as AxiosError, null);
                 await AsyncStorage.removeItem('auth_tokens');
