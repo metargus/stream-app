@@ -12,7 +12,7 @@ import {
     Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { useNavigation } from '@react-navigation/native';
+import authService from '../../services/auth';
 import { styles } from './styles';
 import { colors } from '../../theme/colors';
 import {useAuth} from "../../contexts/AuthContext.tsx";
@@ -53,10 +53,9 @@ export const SignInScreen: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [focusedField, setFocusedField] = useState<'username' | 'password' | null>(null);
-    const { signIn } = useAuth();
+    const { signIn, googleSignIn } = useAuth();
 
     const passwordInputRef = useRef<TextInput>(null);
-    const navigation = useNavigation();
 
     const handleSignIn = async () => {
         try {
@@ -66,6 +65,18 @@ export const SignInScreen: React.FC = () => {
             // Navigation will be handled automatically by the root navigator
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Sign in failed');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            setIsLoading(true);
+            await authService.googleSignIn();
+            await googleSignIn();
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Google sign in failed');
         } finally {
             setIsLoading(false);
         }
@@ -149,6 +160,17 @@ export const SignInScreen: React.FC = () => {
                     <ActivityIndicator color={colors.white} />
                 ) : (
                     <Text style={styles.signInText}>Sign In</Text>
+                )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.googleButton}
+                onPress={handleGoogleSignIn}
+            >
+                {isLoading ? (
+                    <ActivityIndicator color={colors.white} />
+                ) : (
+                    <Text style={styles.googleButtonText}>Sign in with Google</Text>
                 )}
             </TouchableOpacity>
 

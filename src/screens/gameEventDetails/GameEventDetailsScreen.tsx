@@ -10,7 +10,7 @@ import {
     StyleSheet,
     ActivityIndicator, SafeAreaView, Alert, Linking,
 } from 'react-native';
-import RNFetchBlob from 'rn-fetch-blob';
+import RNFS from 'react-native-fs';
 import { Platform, PermissionsAndroid } from 'react-native';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -106,37 +106,31 @@ export const GameEventDetailsScreen: React.FC = () => {
     };
 
     const downloadRecording = async (url: string) => {
-        if (!(await checkPermission())) {
-            return;
-        }
+        const granted = await checkPermission();
+        if (!granted) return;
 
-        const { config, fs } = RNFetchBlob;
-        const date = new Date();
-        const fileName = `recording_${date.getTime()}.mp4`;
-        const downloadsPath = Platform.OS === 'ios' ? fs.dirs.DocumentDir : fs.dirs.DownloadDir;
-        const filePath = `${downloadsPath}/${fileName}`;
+        const fileName = `recording_${Date.now()}.mp4`;
+        const path = `${RNFS.DownloadDirectoryPath}/${fileName}`;
 
         try {
-            const response = await config({
-                fileCache: true,
-                addAndroidDownloads: {
-                    useDownloadManager: true,
-                    notification: true,
-                    path: filePath,
-                    description: 'Downloading recording...',
-                    mime: 'video/mp4',
-                    mediaScannable: true,
-                }
-            }).fetch('GET', url);
+            const options = {
+                fromUrl: url,
+                toFile: path,
+                background: true,
+                beginOnWifiReady: true,
+                progressDivider: 1
+            };
 
-            if (Platform.OS === 'ios') {
-                RNFetchBlob.ios.previewDocument(response.path());
+            const download = RNFS.downloadFile(options);
+            const result = await download.promise;
+
+            if (result.statusCode === 200) {
+                Alert.alert('Success', 'Recording downloaded successfully');
             }
         } catch (error) {
             console.error('Download failed:', error);
         }
     };
-
     const fetchEventDetails = async () => {
         try {
             setIsLoading(true);

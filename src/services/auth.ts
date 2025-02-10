@@ -1,5 +1,6 @@
 // src/services/auth.ts
-import { AuthResponse, AuthTokens, RefreshTokenResponse, Credentials } from '../types/auth';
+import { AuthResponse, AuthTokens, Credentials } from '../types/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import {User} from "../types/user.ts";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -46,6 +47,34 @@ class AuthService {
     async isSignedIn(): Promise<boolean> {
         const tokens = await this.getStoredTokens();
         return !!tokens;
+    }
+
+    async googleSignIn(): Promise<AuthResponse> {
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            
+            // Send to your backend
+            const response = await axiosInstance.post<AuthResponse>(
+                '/api/auth/google',
+                userInfo.data?.idToken
+            );
+            
+            await this.storeTokens(response.data);
+            return response.data;
+        } catch (error) {
+            console.log(error)
+            throw this.handleError(error);
+        }
+    }
+
+    async googleSignOut(): Promise<void> {
+        try {
+            await GoogleSignin.signOut();
+            await this.signOut();
+        } catch (error) {
+            throw this.handleError(error);
+        }
     }
 
     // Helper methods
