@@ -1,4 +1,4 @@
-import { Organization } from '../types/organization';
+import {Organization} from '../types/organization';
 import axiosInstance from './api/axiosInstance.ts';
 import axios from 'axios';
 
@@ -17,7 +17,7 @@ class OrganizationService {
     async getOrganizations(): Promise<Organization[]> {
         try {
             const response = await axiosInstance.get<Organization[]>('/api/clubs');
-            return response.data;
+            return response.data.filter(item => item.scopes?.includes("Livestream"));
         } catch (error) {
             throw this.handleError(error);
         }
