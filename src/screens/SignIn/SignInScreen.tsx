@@ -123,6 +123,7 @@ export const SignInScreen: React.FC = () => {
                         value={password}
                         onChangeText={setPassword}
                         placeholder="Password"
+                        placeholderTextColor="#6A6A6A"
                         secureTextEntry={isSecureText}
                         autoComplete="password"
                         returnKeyType="go"
