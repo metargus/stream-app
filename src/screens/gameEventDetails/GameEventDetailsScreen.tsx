@@ -11,6 +11,7 @@ import {
     ActivityIndicator, SafeAreaView, Alert, Linking,
 } from 'react-native';
 import RNFS from 'react-native-fs';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform, PermissionsAndroid } from 'react-native';
 import {useRoute, RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -80,6 +81,19 @@ export const GameEventDetailsScreen: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
     const [stopPollingInterval, setStopPollingInterval] = useState<NodeJS.Timeout | null>(null);
+
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+    const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
+
+    const MINIMUM_DURATION_MS = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+    const isValidTimeRange = (startDate: Date, endDate: Date): boolean => {
+        const diffMs = endDate.getTime() - startDate.getTime();
+        return diffMs >= MINIMUM_DURATION_MS;
+    };
 
 
     useEffect(() => {
@@ -206,6 +220,129 @@ export const GameEventDetailsScreen: React.FC = () => {
         }
     };
 
+    const handleStartDateChange = (event: any, selectedDate?: Date) => {
+        setShowStartDatePicker(false);
+        if (selectedDate) {
+            const newStartDate = new Date(state.startsAt);
+            newStartDate.setFullYear(selectedDate.getFullYear());
+            newStartDate.setMonth(selectedDate.getMonth());
+            newStartDate.setDate(selectedDate.getDate());
+
+            // Check if new start date would make current end date invalid
+            if (!isValidTimeRange(newStartDate, state.endsAt)) {
+                // Automatically adjust end date to maintain minimum duration
+                const newEndDate = new Date(newStartDate.getTime() + MINIMUM_DURATION_MS);
+
+                setState(prev => ({
+                    ...prev,
+                    startsAt: newStartDate,
+                    endsAt: newEndDate
+                }));
+
+                // Update both dates in backend
+                handleUpdateEvent({
+                    startDateTime: newStartDate.toISOString(),
+                    endDateTime: newEndDate.toISOString()
+                });
+            } else {
+                setState(prev => ({
+                    ...prev,
+                    startsAt: newStartDate
+                }));
+
+                handleUpdateEvent({
+                    startDateTime: newStartDate.toISOString()
+                });
+            }
+            setValidationError(null);
+        }
+    };
+
+    const handleStartTimeChange = (event: any, selectedTime?: Date) => {
+        setShowStartTimePicker(false);
+        if (selectedTime) {
+            const newStartDate = new Date(state.startsAt);
+            newStartDate.setHours(selectedTime.getHours());
+            newStartDate.setMinutes(selectedTime.getMinutes());
+
+            // Check if new start time would make current end time invalid
+            if (!isValidTimeRange(newStartDate, state.endsAt)) {
+                // Automatically adjust end time to maintain minimum duration
+                const newEndDate = new Date(newStartDate.getTime() + MINIMUM_DURATION_MS);
+
+                setState(prev => ({
+                    ...prev,
+                    startsAt: newStartDate,
+                    endsAt: newEndDate
+                }));
+
+                // Update both times in backend
+                handleUpdateEvent({
+                    startDateTime: newStartDate.toISOString(),
+                    endDateTime: newEndDate.toISOString()
+                });
+            } else {
+                setState(prev => ({
+                    ...prev,
+                    startsAt: newStartDate
+                }));
+
+                handleUpdateEvent({
+                    startDateTime: newStartDate.toISOString()
+                });
+            }
+            setValidationError(null);
+        }
+    };
+
+    const handleEndDateChange = (event: any, selectedDate?: Date) => {
+        setShowEndDatePicker(false);
+        if (selectedDate) {
+            const newEndDate = new Date(state.endsAt);
+            newEndDate.setFullYear(selectedDate.getFullYear());
+            newEndDate.setMonth(selectedDate.getMonth());
+            newEndDate.setDate(selectedDate.getDate());
+
+            if (!isValidTimeRange(state.startsAt, newEndDate)) {
+                setValidationError('End time must be at least 30 minutes after start time');
+                return;
+            }
+
+            setState(prev => ({
+                ...prev,
+                endsAt: newEndDate
+            }));
+
+            handleUpdateEvent({
+                endDateTime: newEndDate.toISOString()
+            });
+            setValidationError(null);
+        }
+    };
+
+    const handleEndTimeChange = (event: any, selectedTime?: Date) => {
+        setShowEndTimePicker(false);
+        if (selectedTime) {
+            const newEndDate = new Date(state.endsAt);
+            newEndDate.setHours(selectedTime.getHours());
+            newEndDate.setMinutes(selectedTime.getMinutes());
+
+            if (!isValidTimeRange(state.startsAt, newEndDate)) {
+                setValidationError('End time must be at least 30 minutes after start time');
+                return;
+            }
+
+            setState(prev => ({
+                ...prev,
+                endsAt: newEndDate
+            }));
+
+            handleUpdateEvent({
+                endDateTime: newEndDate.toISOString()
+            });
+            setValidationError(null);
+        }
+    };
     const handleResumeBroadcast = async () => {
         try {
             if (!state.event?.broadcast?.id) return;
@@ -364,14 +501,19 @@ export const GameEventDetailsScreen: React.FC = () => {
         }));
     };
 
-    const formatDateTime = (date: Date): string => {
-        return date.toLocaleString('en-US', {
+    const formatTime = (date: Date): string => {
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+    };
+
+    const formatDate = (date: Date): string => {
+        return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
         });
     };
 
@@ -603,23 +745,88 @@ export const GameEventDetailsScreen: React.FC = () => {
             )}
 
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Starts at</Text>
-                <TextInput
-                    style={[styles.input, isFinished && styles.disabledInput]}
-                    value={formatDateTime(state.startsAt)}
-                    editable={false}
-                />
-            </View>
+            <>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Starts at</Text>
+                    <View style={styles.dateTimeContainer}>
+                        <TouchableOpacity
+                            style={[styles.dateTimeButton, isFinished && styles.disabledInput]}
+                            onPress={() => setShowStartDatePicker(true)}
+                            disabled={isFinished}
+                        >
+                            <Text style={styles.dateTimeText}>{formatDate(state.startsAt)}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.dateTimeButton, isFinished && styles.disabledInput]}
+                            onPress={() => setShowStartTimePicker(true)}
+                            disabled={isFinished}
+                        >
+                            <Text style={styles.dateTimeText}>{formatTime(state.startsAt)}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
-            <View style={styles.inputGroup}>
-                <Text style={styles.label}>Ends at</Text>
-                <TextInput
-                    style={[styles.input, isFinished && styles.disabledInput]}
-                    value={formatDateTime(state.endsAt)}
-                    editable={false}
-                />
-            </View>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Ends at</Text>
+                    <View style={styles.dateTimeContainer}>
+                        <TouchableOpacity
+                            style={[styles.dateTimeButton, isFinished && styles.disabledInput]}
+                            onPress={() => setShowEndDatePicker(true)}
+                            disabled={isFinished}
+                        >
+                            <Text style={styles.dateTimeText}>{formatDate(state.endsAt)}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.dateTimeButton, isFinished && styles.disabledInput]}
+                            onPress={() => setShowEndTimePicker(true)}
+                            disabled={isFinished}
+                        >
+                            <Text style={styles.dateTimeText}>{formatTime(state.endsAt)}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {validationError && (
+                        <Text style={styles.errorText}>{validationError}</Text>
+                    )}
+                </View>
+
+                {showStartDatePicker && (
+                    <DateTimePicker
+                        value={state.startsAt}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={handleStartDateChange}
+                        minimumDate={new Date()}
+                    />
+                )}
+
+                {showStartTimePicker && (
+                    <DateTimePicker
+                        value={state.startsAt}
+                        mode="time"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={handleStartTimeChange}
+                    />
+                )}
+
+                {showEndDatePicker && (
+                    <DateTimePicker
+                        value={state.endsAt}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={handleEndDateChange}
+                        minimumDate={state.startsAt}
+                    />
+                )}
+
+                {showEndTimePicker && (
+                    <DateTimePicker
+                        value={state.endsAt}
+                        mode="time"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={handleEndTimeChange}
+                    />
+                )}
+            </>
 
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Stream Key</Text>
@@ -718,7 +925,7 @@ export const GameEventDetailsScreen: React.FC = () => {
                 <Switch
                     value={state.isCommentaryOn}
                     onValueChange={handleChangeCommentary}
-                    disabled={isLoading || isFinished || isCreating || isDeleting}
+                    disabled={isLoading || isFinished || isCreating || isDeleting || state.isRecord}
                 />
             </View>
 
@@ -1069,5 +1276,23 @@ const styles = StyleSheet.create({
         color: colors.primary,
         fontSize: 16,
         fontWeight: '500',
+    },
+    dateTimeContainer: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    dateTimeButton: {
+        flex: 1,
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    dateTimeText: {
+        fontSize: 16,
+        color: colors.text,
     }
 })
