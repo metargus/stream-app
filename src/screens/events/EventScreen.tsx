@@ -1,5 +1,6 @@
 //src/screens/Events/EventsScreen.tsx
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
     Text,
@@ -69,9 +70,11 @@ export const EventsScreen = () => {
         }
     }, [organizationId]);
 
-    useEffect(() => {
-        fetchEvents();
-    }, [fetchEvents]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchEvents();
+        }, [fetchEvents])
+    );
 
     const handleRefresh = () => {
         fetchEvents(true);

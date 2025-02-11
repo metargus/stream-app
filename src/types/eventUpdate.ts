@@ -42,7 +42,7 @@ export interface EventUpdateRequest {
     courtBottomRightLogoPreview?: string;
     courtCenterLogoPreview?: string;
 
-    uploadedMedias?: Record<string, never>; 
+    uploadedMedias?: Record<string, string>;
     
     gameAnnouncementNHoursBefore?: string | null;
     gameAnnouncementNHoursBeforeHours: string;
@@ -67,6 +67,11 @@ export const createEventUpdateRequest = (event: GameEvent): EventUpdateRequest =
             isHomeTeam: false
         }
     ];
+
+    const uploadedMedias = event.media?.reduce((acc, media) => ({
+        ...acc,
+        [media.fileName]: media.id
+    }), {}) || {};
     
     return {
         autoStart: event.broadcast?.autoStart || false,
@@ -121,7 +126,7 @@ export const createEventUpdateRequest = (event: GameEvent): EventUpdateRequest =
         eventYTConfig: event.ytBroadcastDetails || null,
         
         // Media
-        uploadedMedias: {},
+        uploadedMedias: uploadedMedias,
         
         // Game announcement settings
         isGameAnnouncementEnabled: event.gameAnnouncementEnabled || false,
