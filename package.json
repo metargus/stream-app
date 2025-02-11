@@ -1,5 +1,6 @@
 {
-  "name": "StreamManagerApp",
+  "name": "mismatch-streaming",
+  "displayName": "Mismatch Streaming",  
   "version": "1.0.0",
   "private": true,
   "scripts": {
