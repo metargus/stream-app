@@ -10,6 +10,7 @@ import {
     Platform,
     TextInputProps,
     Image,
+    useColorScheme
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import authService from '../../services/auth';
@@ -84,13 +85,16 @@ export const SignInScreen: React.FC = () => {
 
     const canSignIn = username.trim().length > 0 && password.length > 0 && !isLoading;
 
+    const colorScheme = useColorScheme();
+    const darkModeActive = colorScheme === 'dark'
+    
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
+            style={[styles.container, darkModeActive && {backgroundColor: 'black'}]}        
         >
             <Image
-                source={require('../../assets/logo.png')}
+                source={darkModeActive? require('../../assets/logoDark.png') : require('../../assets/logo.png')}
                 style={styles.logo}
             />
 

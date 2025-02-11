@@ -1,7 +1,7 @@
 // src/theme/colors.ts
 
 export const colors = {
-    primary: '#007AFF', // Your app's primary color
+    primary: '#007AFF',
     background: '#FFFFFF',
     surface: '#FFFFFF',
     text: '#000000',

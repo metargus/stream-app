@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Image, TouchableOpacity, StyleSheet, Text} from 'react-native';
+import {View, Image, TouchableOpacity, StyleSheet, Text, useColorScheme} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import {colors} from '../../theme/colors';
 import {useAuth} from '../../contexts/AuthContext';
@@ -16,6 +16,9 @@ export const Navbar: React.FC<NavbarProps> = ({title = null}) => {
 
     const isOrganizationsScreen = route.name === 'Organizations';
 
+    const colorScheme = useColorScheme();
+    const darkModeActive = colorScheme === 'dark'
+
     const handleLogout = async () => {
         try {
             await signOut();
@@ -29,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({title = null}) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, darkModeActive && {backgroundColor: 'black'}]}>
             <View style={styles.leftContainer}>
                 <TouchableOpacity
                     onPress={isOrganizationsScreen ? handleLogout : handleBack}
@@ -45,10 +48,10 @@ export const Navbar: React.FC<NavbarProps> = ({title = null}) => {
             </View>
             <View style={styles.centerContainer}>
                 {!title ? <Image
-                    source={require('../../assets/logo.png')}
+                    source={darkModeActive? require('../../assets/logoDark.png') : require('../../assets/logo.png')}
                     style={styles.logo}
                     resizeMode="contain"
-                /> : <Text style={styles.title}>{title}</Text>}
+                /> : <Text style={[styles.title, darkModeActive && {color: 'white'}]}>{title}</Text>}
             </View>
             <View style={styles.rightContainer}/>
         </View>
