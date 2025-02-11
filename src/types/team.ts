@@ -9,10 +9,10 @@ export interface Team {
 
 export interface EventTeam {
     id: string;
-    name?: string;
-    logoUrl?: string;
+    name: string;
+    threeLetterIdentifier: string | null;
+    logoBase64: string | null;
+    logoUrl: string | null;
     isHomeTeam: boolean;
-    logoBase64?: string;
-    threeLetterIdentifier: string;
-    teamId?: string;
+    teamId: string | null;
 }

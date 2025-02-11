@@ -33,6 +33,31 @@ export const GameEventDetailsScreen: React.FC = () => {
         type: '',
         title: '',
         organization: '',
+
+        teams: [],
+        eventTeams: [],
+        
+        externalId: '',
+
+        hasRecording: false,
+        hasStats: false,
+        hasSocial: true,
+        showCards: false,
+
+        isBroadcast: false,
+        isRecord: false,
+        isCommentaryOn: false,
+        autoStart: false,
+        autoStop: false,
+
+        homeTeamName: '',
+        awayTeamName: '',
+        competitionName: '',
+
+        isGameAnnouncementEnabled: false,
+        gameAnnouncementNHoursBeforeHours: "01",
+        gameAnnouncementNHoursBeforeMins: "01",
+
         dataStatus: { isExecuting: false, hasError: false },
         updateStartsAtStatus: { isExecuting: false, hasError: false },
         updateEndsAtStatus: { isExecuting: false, hasError: false },
@@ -41,17 +66,14 @@ export const GameEventDetailsScreen: React.FC = () => {
         updateAwayTeamNameStatus: { isExecuting: false, hasError: false },
         updateCompetitionNameStatus: { isExecuting: false, hasError: false },
         updatePictureInPictureStatus: { isExecuting: false, hasError: false },
+
         startsAt: new Date(),
         endsAt: new Date(),
         streamKey: '',
-        homeTeamName: '',
-        awayTeamName: '',
-        competitionName: '',
         pictureInPicture: false,
-        isCommentaryOn: false,
-        editableSection: 'event'
+        editableSection: 'event',
+        uploadedMedias: []
     });
-
     const route = useRoute<RouteProp<MainStackParamList, 'GameEventDetails'>>();
     const { id, organizationId, type } = route.params;
     const [isLoading, setIsLoading] = useState(false);
@@ -135,23 +157,47 @@ export const GameEventDetailsScreen: React.FC = () => {
         try {
             setIsLoading(true);
             const event = await gameEvent.getGameEvent(id, type, organizationId);
-            const recording = event.hasRecording? await gameEvent.getEventRecording(id, organizationId) : null;
-            
-            const homeTeam = event.eventTeams?.find(team => team.isHomeTeam) || {name: ''};
-            const awayTeam = event.eventTeams?.find(team => !team.isHomeTeam) || {name: ''};
-            
+            const recording = event.hasRecording ? await gameEvent.getEventRecording(id, organizationId) : null;
+
             setState(prev => ({
                 ...prev,
+                id: event.id,
                 event,
-                recording: recording,
+                recording,
+                externalId: event.externalId,
+                teams: event.teams || [],
+                eventTeams: event.eventTeams || [],
+                hasRecording: event.hasRecording || false,
+                hasStats: event.hasStats || false,
+                hasSocial: event.hasSocial || true,
+                showCards: event.showCards || false,
                 title: event.title,
+                place: event.place,
+                courtId: event.court?.id,
+                notes: event.notes,
                 startsAt: new Date(event.startDateTime),
                 endsAt: new Date(event.endDateTime),
                 streamKey: event.broadcast?.youtubeStreamKey || '',
-                homeTeamName: homeTeam.name || '',
-                awayTeamName: awayTeam.name || '',
+                homeTeamName: event.eventTeams?.find(team => team.isHomeTeam)?.name || '',
+                awayTeamName: event.eventTeams?.find(team => !team.isHomeTeam)?.name || '',
                 competitionName: event.competitionName || '',
-                isCommentaryOn: event.broadcast?.isCommentaryOn || false
+                isBroadcast: !!event.broadcast,
+                isRecord: !!event.broadcast?.streamerSaveUrl,
+                isCommentaryOn: event.broadcast?.isCommentaryOn || false,
+                autoStart: event.broadcast?.autoStart || false,
+                autoStop: event.broadcast?.autoStop || false,
+                youtubeStreamKey: event.broadcast?.youtubeStreamKey,
+                youtubeStreamKey2: event.broadcast?.youtubeStreamKey2,
+                eventYTConfig: event.ytBroadcastDetails,
+                competitionLogoPreview: event.competitionLogo,
+                courtTopLeftLogoPreview: event.broadcast?.courtTopLeftLogo,
+                courtTopRightLogoPreview: event.broadcast?.courtTopRightLogo,
+                courtBottomLeftLogoPreview: event.broadcast?.courtBottomLeftLogo,
+                courtBottomRightLogoPreview: event.broadcast?.courtBottomRightLogo,
+                courtCenterLogoPreview: event.broadcast?.courtCenterLogo,
+                uploadedMedias: event.media,
+                isGameAnnouncementEnabled: event.gameAnnouncementEnabled || false,
+                gameAnnouncementNHoursBefore: event.gameAnnouncementNHoursBefore || "01"
             }));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load event');
@@ -275,15 +321,39 @@ export const GameEventDetailsScreen: React.FC = () => {
     };
 
     const handleHomeTeamNameBlur = () => {
-        handleUpdateEvent({ homeTeamName: state.homeTeamName });
+        if (!state.event) return;
+
+        // Create deep copy of event teams
+        const updatedEventTeams = state.event.eventTeams?.map(team => ({
+            ...team,
+            name: team.isHomeTeam ? state.homeTeamName : team.name
+        }));
+
+        handleUpdateEvent({
+            eventTeams: updatedEventTeams
+        });
     };
 
+
     const handleAwayTeamNameBlur = () => {
-        handleUpdateEvent({ awayTeamName: state.awayTeamName });
+        if (!state.event) return;
+
+        // Create deep copy of event teams
+        const updatedEventTeams = state.event.eventTeams?.map(team => ({
+            ...team,
+            // Update name only for away team
+            name: !team.isHomeTeam ? state.awayTeamName : team.name
+        }));
+
+        handleUpdateEvent({
+            eventTeams: updatedEventTeams
+        });
     };
 
     const handleCompetitionNameBlur = () => {
-        handleUpdateEvent({ competitionName: state.competitionName });
+        handleUpdateEvent({
+            competitionName: state.competitionName,
+        });
     };
 
     // Modify the picture in picture handler

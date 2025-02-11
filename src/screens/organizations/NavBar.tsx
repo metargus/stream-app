@@ -19,10 +19,6 @@ export const Navbar: React.FC<NavbarProps> = ({title = null}) => {
     const handleLogout = async () => {
         try {
             await signOut();
-            navigation.reset({
-                index: 0,
-                routes: [{name: 'Auth'}],
-            });
         } catch (error) {
             console.error('Logout failed:', error);
         }
@@ -88,7 +84,7 @@ const styles = StyleSheet.create({
         paddingRight: 16,
     },
     logo: {
-        height: 48,
+        height: 40,
         width: '100%',
     },
     leftButton: {

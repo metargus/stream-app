@@ -1,4 +1,5 @@
 import {EventTeam, Team} from './team';
+import {ytBroadcastDetails} from "./youtubeVideo.ts";
 
 export type BroadcastState =
     | 'scheduled'
@@ -34,12 +35,16 @@ export interface Recording {
     preparing?: boolean | null;
 }
 
-// src/types/event.ts
 export interface EventKind {
     id: string;
     code: string;
     name?: string;
     color?: string;
+}
+
+export interface Court {
+    id: string;
+    name?: string;
 }
 
 export interface BroadcastInfo {
@@ -69,59 +74,123 @@ export interface Court {
 }
 
 export interface GameEvent {
+    // Base fields
     id: string;
-    hasRecording: boolean;
-    type: EventKind;
+    startDateTime: string;
+    endDateTime: string;
     title?: string;
+
+    // Recording and stats
+    hasRecording: boolean;
+    hasStats: boolean;
+    hasSocial: boolean;
+    showCards: boolean;
+    externalId?: string;
+
+    // Type and location
+    type: EventKind;
     place?: string;
     notes?: string;
     court?: Court;
-    homeTeamName?: string;
-    homeTeamLogo?: string;
-    awayTeamName?: string;
-    awayTeamLogo?: string;
-    competitionName?: string;
-    competitionLogo?: string;
-    broadcast?: BroadcastInfo;
-    ytBroadcastDetails?: any;
-    media?: any[];
+
+    // Teams and participants
     teams?: Team[];
     eventTeams?: EventTeam[];
-    startDateTime: string;
-    endDateTime: string;
+
+    // Competition details
+    competitionName?: string;
+    competitionLogo?: string;
+
+    // Broadcast and media
+    broadcast?: BroadcastInfo;
+    ytBroadcastDetails?: ytBroadcastDetails; 
+    media?: any[];
+
+    // Game announcement settings
+    gameAnnouncementNHoursBefore?: string;
+    gameAnnouncementEnabled: boolean;
 }
 
 export interface GameEventDetailsState {
+    // Base fields
     id: string;
-    recording: Recording | null,
+    recording: Recording | null;
     type: string;
     title?: string;
     organization: string;
 
+    // Event status fields
     dataStatus: WorkStatus;
     event?: GameEvent;
+    
+    externalId?: string;
 
+    // Teams & Event Teams
+    teams?: Team[];
+    eventTeams?: EventTeam[];
+
+    // Event details
+    hasRecording: boolean;
+    hasStats: boolean;
+    hasSocial: boolean;
+    showCards: boolean;
+    place?: string;
+    courtId?: string;
+    notes?: string;
+
+    // Broadcast settings
+    isBroadcast: boolean;
+    isRecord: boolean;
+    isCommentaryOn: boolean;
+    autoStart: boolean;
+    autoStop: boolean;
+
+    // YouTube configuration
+    youtubeStreamKey?: string;
+    youtubeStreamKey2?: string;
+    eventYTConfig?: ytBroadcastDetails;
+
+    // Team names and logos
+    homeTeamName: string;
+    awayTeamName: string;
+    homeTeamLogoPreview?: string;
+    awayTeamLogoPreview?: string;
+
+    // Competition details
+    competitionName: string;
+    competitionLogoPreview?: string;
+
+    // Court logos
+    courtTopLeftLogoPreview?: string;
+    courtTopRightLogoPreview?: string;
+    courtBottomLeftLogoPreview?: string;
+    courtBottomRightLogoPreview?: string;
+    courtCenterLogoPreview?: string;
+
+    // Media
+    uploadedMedias?: CommercialMedia[];
+
+    // Game announcement settings
+    isGameAnnouncementEnabled: boolean;
+    gameAnnouncementNHoursBefore?: string;
+    gameAnnouncementNHoursBeforeHours: string;
+    gameAnnouncementNHoursBeforeMins: string;
+
+    // Update statuses
     updateStartsAtStatus: WorkStatus;
-    startsAt: Date;
-
     updateEndsAtStatus: WorkStatus;
-    endsAt: Date;
-
     updateStreamKeyStatus: WorkStatus;
+    updateHomeTeamNameStatus: WorkStatus;
+    updateAwayTeamNameStatus: WorkStatus;
+    updateCompetitionNameStatus: WorkStatus;
+    updatePictureInPictureStatus: WorkStatus;
+
+    // Dates
+    startsAt: Date;
+    endsAt: Date;
     streamKey: string;
 
-    updateHomeTeamNameStatus: WorkStatus;
-    homeTeamName: string;
-
-    updateAwayTeamNameStatus: WorkStatus;
-    awayTeamName: string;
-
-    updateCompetitionNameStatus: WorkStatus;
-    competitionName: string;
-
-    updatePictureInPictureStatus: WorkStatus;
+    // UI state
     pictureInPicture: boolean;
-    isCommentaryOn: boolean;
-
     editableSection: 'event' | 'gameDetails' | 'cameraAndAudio' | 'videos';
 }
