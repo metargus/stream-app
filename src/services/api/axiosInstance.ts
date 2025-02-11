@@ -2,7 +2,7 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'https://api-dev.mismatch.gr'; // Replace with your actual API URL
+const API_URL = 'https://api.mismatch.gr'; // Replace with your actual API URL
 
 let isRefreshing = false;
 let failedQueue: any[] = [];

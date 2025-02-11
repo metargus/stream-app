@@ -24,6 +24,7 @@ class AuthService {
                 '/api/auth/login',
                 credentials
             );
+            if (!response.data) throw this.handleError('Wrong email or password!')
             await this.storeTokens(response.data);
             return response.data;
         } catch (error) {

@@ -64,7 +64,7 @@ export const SignInScreen: React.FC = () => {
             await signIn(username.trim(), password);
             // Navigation will be handled automatically by the root navigator
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Sign in failed');
+            setError(!!err ? err : 'Sign in failed');
         } finally {
             setIsLoading(false);
         }
